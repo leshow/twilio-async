@@ -1,25 +1,45 @@
 extern crate hyper;
+extern crate native_tls;
+extern crate tokio_tls;
 extern crate url;
 
-use std::error::Error;
-use std::fmt;
-use std::io;
-
 use self::TwilioErr::*;
+use hyper::{header::{Authorization, Basic},
+            Method};
+use std::{borrow::Borrow, error::Error, fmt, io};
+mod twiliourl;
 
 pub struct Twilio {
     sid: String,
     token: String,
+    auth: Authorization<Basic>,
 }
 
 impl Twilio {
     pub fn new<S: Into<String>>(sid: S, token: S) -> Self {
+        let username = sid.into();
+        let pwd = token.into();
         Twilio {
-            sid: sid.into(),
-            token: token.into(),
+            sid: username.clone(),
+            token: pwd.clone(),
+            auth: Authorization(Basic {
+                username,
+                password: Some(pwd),
+            }),
         }
     }
-    pub fn authenticate() -> Result<(), TwilioErr> {
+    pub fn request<K, V, I>(
+        &self,
+        method: Method,
+        url: url::Url,
+        params: I,
+    ) -> Result<(), TwilioErr>
+    where
+        K: AsRef<str>,
+        V: AsRef<str>,
+        I: IntoIterator,
+        I::Item: Borrow<(K, V)>,
+    {
         unimplemented!();
     }
 }
