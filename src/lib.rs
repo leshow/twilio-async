@@ -18,28 +18,37 @@ use request::*;
 use {
     futures::{future, Future, Stream},
     hyper::{
-        client::HttpConnector, header::{Authorization, Basic, ContentType}, Client, Method, Request,
+        client::HttpConnector, header::{self, Authorization, Basic, ContentType}, Client, Method,
+        Request,
     },
     hyper_tls::HttpsConnector, std::{borrow::Borrow, error::Error, fmt, io},
-    tokio_core::reactor::{Core, Handle}, url::Url,
+    std::{
+        cell::{self, RefCell}, rc::Rc,
+    }, tokio_core::reactor::{Core, Handle},
+    url::Url,
 };
+
+static BASE: &str = "https://api.twilio.com/2010-04-01/Accounts/";
 
 pub struct Twilio {
     sid: String,
     token: String,
     auth: Authorization<Basic>,
-    client: Client<HttpsConnector<HttpConnector>, hyper::Body>,
+    client: Rc<Client<HttpsConnector<HttpConnector>, hyper::Body>>,
+    core: Rc<RefCell<Core>>,
 }
 
 impl Twilio {
-    pub fn new<S>(sid: S, token: S, handle: &Handle) -> TwilioResult<Twilio>
+    pub fn new<S>(sid: S, token: S) -> TwilioResult<Twilio>
     where
         S: Into<String>,
     {
+        let core = Core::new()?;
+        let handle = core.handle();
         let username = sid.into();
         let pwd = token.into();
         let client = Client::configure()
-            .connector(HttpsConnector::new(1, &handle)?)
+            .connector(HttpsConnector::new(4, &handle)?)
             .build(&handle);
 
         Ok(Twilio {
@@ -49,7 +58,8 @@ impl Twilio {
                 username,
                 password: Some(pwd),
             }),
-            client,
+            client: Rc::new(client),
+            core: Rc::new(RefCell::new(core)),
         })
     }
 
@@ -57,48 +67,44 @@ impl Twilio {
         unimplemented!()
     }
 
-    pub fn request<U, K, D, V, I>(
+    fn request<U, D>(
         &self,
-        mut core: Core,
         method: Method,
         url: U,
         t_type: RequestType,
-    ) -> Result<D, TwilioErr>
+    ) -> Result<(hyper::Headers, hyper::StatusCode, Option<D>), TwilioErr>
     where
         U: AsRef<str>,
-        K: AsRef<str>,
-        V: AsRef<str>,
-        I: IntoIterator,
-        I::Item: Borrow<(K, V)>,
         D: serde::de::DeserializeOwned,
     {
-        let url = url.as_ref().parse::<hyper::Uri>()?;
-        let body = t_type.to_string();
-        let content_type_header = hyper::header::ContentType::form_url_encoded();
+        let mut core_ref = self.core.try_borrow_mut()?;
+        let url = format!("{}/{}/{}.json", BASE, self.sid, url.as_ref()).parse::<hyper::Uri>()?;
+        let content_type_header = header::ContentType::form_url_encoded();
         let mut request = Request::new(method, url);
-        request.set_body(body);
+        request.set_body(t_type.to_string());
         request.headers_mut().set(content_type_header);
         let fut_req = self.client.request(request).and_then(|res| {
             println!("Response: {}", res.status());
             println!("Headers: \n{}", res.headers());
+
+            let header = res.headers().clone();
+            let status = res.status();
 
             res.body()
                 .fold(Vec::new(), |mut v, chunk| {
                     v.extend(&chunk[..]);
                     future::ok::<_, hyper::Error>(v)
                 })
-                .and_then(|chunks| {
-                    let s = String::from_utf8(chunks).unwrap();
-                    future::ok::<_, hyper::Error>(s)
+                .map(move |chunks| {
+                    if chunks.is_empty() {
+                        Ok((header, status, None))
+                    } else {
+                        Ok((header, status, Some(serde_json::from_slice(&chunks)?)))
+                    }
                 })
         });
-        match core.run(fut_req) {
-            Ok(res) => {
-                println!("{}", res);
-                Ok(serde_json::from_str(&res)?)
-            }
-            Err(_) => Err(TwilioErr::RequestErr),
-        }
+
+        core_ref.run(fut_req)?
     }
 }
 
@@ -108,8 +114,9 @@ pub enum TwilioErr {
     Io(io::Error),
     TlsErr(hyper_tls::Error),
     UrlParse(hyper::error::UriError),
-    RequestErr,
+    NetworkErr(hyper::Error),
     SerdeErr(serde_json::Error),
+    BorrowErr(cell::BorrowMutError),
 }
 
 pub type TwilioResult<T> = Result<T, TwilioErr>;
@@ -121,7 +128,8 @@ impl Error for TwilioErr {
             TlsErr(ref e) => e.description(),
             UrlParse(ref e) => e.description(),
             SerdeErr(ref e) => e.description(),
-            RequestErr => "Request Error",
+            NetworkErr(ref e) => e.description(),
+            BorrowErr(ref e) => e.description(),
         }
     }
 }
@@ -133,8 +141,15 @@ impl fmt::Display for TwilioErr {
             TlsErr(ref e) => write!(f, "TLS Connection Error: {}", e),
             UrlParse(ref e) => write!(f, "URL parse error: {}", e),
             SerdeErr(ref e) => write!(f, "Serde JSON Error: {}", e),
-            RequestErr => write!(f, "There was a network error"),
+            NetworkErr(ref e) => write!(f, "There was a network error. {}", e),
+            BorrowErr(ref e) => write!(f, "Error trying to get client reference. {}", e),
         }
+    }
+}
+
+impl From<io::Error> for TwilioErr {
+    fn from(e: io::Error) -> Self {
+        Io(e)
     }
 }
 
@@ -149,8 +164,21 @@ impl From<hyper::error::UriError> for TwilioErr {
         UrlParse(e)
     }
 }
+
 impl From<serde_json::Error> for TwilioErr {
     fn from(e: serde_json::Error) -> Self {
         SerdeErr(e)
+    }
+}
+
+impl From<hyper::Error> for TwilioErr {
+    fn from(e: hyper::Error) -> Self {
+        NetworkErr(e)
+    }
+}
+
+impl From<cell::BorrowMutError> for TwilioErr {
+    fn from(e: cell::BorrowMutError) -> Self {
+        BorrowErr(e)
     }
 }
