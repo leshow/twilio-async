@@ -8,7 +8,13 @@ extern crate serde_json;
 extern crate tokio_core;
 extern crate url;
 
+mod message;
+mod request;
+mod twiliourl;
+
 use self::TwilioErr::*;
+use message::*;
+use request::*;
 use {
     futures::{future, Future, Stream},
     hyper::{
@@ -17,7 +23,6 @@ use {
     hyper_tls::HttpsConnector, std::{borrow::Borrow, error::Error, fmt, io},
     tokio_core::reactor::{Core, Handle}, url::Url,
 };
-mod twiliourl;
 
 pub struct Twilio {
     sid: String,
@@ -48,12 +53,16 @@ impl Twilio {
         })
     }
 
+    pub fn send_msg(&self, msg: Msg) -> TwilioResult<MsgResp> {
+        unimplemented!()
+    }
+
     pub fn request<U, K, D, V, I>(
         &self,
         mut core: Core,
         method: Method,
         url: U,
-        pairs: I,
+        t_type: RequestType,
     ) -> Result<D, TwilioErr>
     where
         U: AsRef<str>,
@@ -64,7 +73,7 @@ impl Twilio {
         D: serde::de::DeserializeOwned,
     {
         let url = url.as_ref().parse::<hyper::Uri>()?;
-        let body = encode_pairs(pairs).unwrap();
+        let body = t_type.to_string();
         let content_type_header = hyper::header::ContentType::form_url_encoded();
         let mut request = Request::new(method, url);
         request.set_body(body);
@@ -91,22 +100,6 @@ impl Twilio {
             Err(_) => Err(TwilioErr::RequestErr),
         }
     }
-}
-
-pub fn encode_pairs<I, K, V>(pairs: I) -> Option<String>
-where
-    K: AsRef<str>,
-    V: AsRef<str>,
-    I: IntoIterator,
-    I::Item: Borrow<(K, V)>,
-{
-    let mut partial = url::form_urlencoded::Serializer::new(String::new());
-    for pair in pairs.into_iter() {
-        let &(ref k, ref v) = pair.borrow();
-        partial.append_pair(k.as_ref(), v.as_ref());
-    }
-    let encoded = partial.finish();
-    Some(encoded)
 }
 
 // Errors
