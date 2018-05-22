@@ -25,14 +25,6 @@ impl Url {
             partial.append_pair(k.as_ref(), v.as_ref());
         }
         let encoded = partial.finish();
-        // let joined: String = pairs
-        //     .into_iter()
-        //     .fold(Vec::new(), |mut acc, pair| {
-        //         let (k, v) = pair.borrow();
-        //         acc.push(format!("{}={}", k.as_ref(), v.as_ref()));
-        //         acc
-        //     })
-        //     .join("&");
         self.query = Some(encoded);
     }
 }

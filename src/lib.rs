@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate serde_derive;
+extern crate futures;
 extern crate hyper;
 extern crate hyper_tls;
 extern crate serde;
@@ -8,12 +9,14 @@ extern crate tokio_core;
 extern crate url;
 
 use self::TwilioErr::*;
-use hyper::{
-    client::HttpConnector, header::{Authorization, Basic}, Client, Method,
+use {
+    futures::{future, Future, Stream},
+    hyper::{
+        client::HttpConnector, header::{Authorization, Basic, ContentType}, Client, Method, Request,
+    },
+    hyper_tls::HttpsConnector, std::{borrow::Borrow, error::Error, fmt, io},
+    tokio_core::reactor::{Core, Handle}, url::Url,
 };
-use hyper_tls::HttpsConnector;
-use std::{borrow::Borrow, error::Error, fmt, io};
-use tokio_core::reactor::Handle;
 mod twiliourl;
 
 pub struct Twilio {
@@ -45,27 +48,65 @@ impl Twilio {
         })
     }
 
-    pub fn authenticate<T>(&self) -> TwilioResult<()>
-    where
-        T: serde::ser::Serialize,
-    {
-        Ok(())
-    }
-
-    pub fn request<K, V, I>(
+    pub fn request<U, K, D, V, I>(
         &self,
+        mut core: Core,
         method: Method,
-        url: url::Url,
-        params: I,
-    ) -> Result<(), TwilioErr>
+        url: U,
+        pairs: I,
+    ) -> Result<D, TwilioErr>
     where
+        U: AsRef<str>,
         K: AsRef<str>,
         V: AsRef<str>,
         I: IntoIterator,
         I::Item: Borrow<(K, V)>,
+        D: serde::de::DeserializeOwned,
     {
-        unimplemented!();
+        let url = url.as_ref().parse::<hyper::Uri>()?;
+        let body = encode_pairs(pairs).unwrap();
+        let content_type_header = hyper::header::ContentType::form_url_encoded();
+        let mut request = Request::new(method, url);
+        request.set_body(body);
+        request.headers_mut().set(content_type_header);
+        let fut_req = self.client.request(request).and_then(|res| {
+            println!("Response: {}", res.status());
+            println!("Headers: \n{}", res.headers());
+
+            res.body()
+                .fold(Vec::new(), |mut v, chunk| {
+                    v.extend(&chunk[..]);
+                    future::ok::<_, hyper::Error>(v)
+                })
+                .and_then(|chunks| {
+                    let s = String::from_utf8(chunks).unwrap();
+                    future::ok::<_, hyper::Error>(s)
+                })
+        });
+        match core.run(fut_req) {
+            Ok(res) => {
+                println!("{}", res);
+                Ok(serde_json::from_str(&res)?)
+            }
+            Err(_) => Err(TwilioErr::RequestErr),
+        }
     }
+}
+
+pub fn encode_pairs<I, K, V>(pairs: I) -> Option<String>
+where
+    K: AsRef<str>,
+    V: AsRef<str>,
+    I: IntoIterator,
+    I::Item: Borrow<(K, V)>,
+{
+    let mut partial = url::form_urlencoded::Serializer::new(String::new());
+    for pair in pairs.into_iter() {
+        let &(ref k, ref v) = pair.borrow();
+        partial.append_pair(k.as_ref(), v.as_ref());
+    }
+    let encoded = partial.finish();
+    Some(encoded)
 }
 
 // Errors
@@ -73,6 +114,9 @@ impl Twilio {
 pub enum TwilioErr {
     Io(io::Error),
     TlsErr(hyper_tls::Error),
+    UrlParse(hyper::error::UriError),
+    RequestErr,
+    SerdeErr(serde_json::Error),
 }
 
 pub type TwilioResult<T> = Result<T, TwilioErr>;
@@ -82,6 +126,9 @@ impl Error for TwilioErr {
         match *self {
             Io(ref e) => e.description(),
             TlsErr(ref e) => e.description(),
+            UrlParse(ref e) => e.description(),
+            SerdeErr(ref e) => e.description(),
+            RequestErr => "Request Error",
         }
     }
 }
@@ -91,6 +138,9 @@ impl fmt::Display for TwilioErr {
         match *self {
             Io(ref e) => write!(f, "IO Error: {}", e),
             TlsErr(ref e) => write!(f, "TLS Connection Error: {}", e),
+            UrlParse(ref e) => write!(f, "URL parse error: {}", e),
+            SerdeErr(ref e) => write!(f, "Serde JSON Error: {}", e),
+            RequestErr => write!(f, "There was a network error"),
         }
     }
 }
@@ -98,5 +148,16 @@ impl fmt::Display for TwilioErr {
 impl From<hyper_tls::Error> for TwilioErr {
     fn from(e: hyper_tls::Error) -> Self {
         TlsErr(e)
+    }
+}
+
+impl From<hyper::error::UriError> for TwilioErr {
+    fn from(e: hyper::error::UriError) -> Self {
+        UrlParse(e)
+    }
+}
+impl From<serde_json::Error> for TwilioErr {
+    fn from(e: serde_json::Error) -> Self {
+        SerdeErr(e)
     }
 }
