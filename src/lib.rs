@@ -18,14 +18,13 @@ use request::*;
 use {
     futures::{future, Future, Stream},
     hyper::{
-        client::HttpConnector, header::{self, Authorization, Basic, ContentType}, Client, Method,
-        Request,
+        client::HttpConnector, header::{self, Authorization, Basic}, Client, Method, Request,
     },
     hyper_tls::HttpsConnector, std::{borrow::Borrow, error::Error, fmt, io},
     std::{
         cell::{self, RefCell}, rc::Rc,
-    }, tokio_core::reactor::{Core, Handle},
-    url::Url,
+    }, tokio_core::reactor::Core,
+    url::form_urlencoded,
 };
 
 static BASE: &str = "https://api.twilio.com/2010-04-01/Accounts/";
@@ -63,8 +62,8 @@ impl Twilio {
         })
     }
 
-    pub fn send_msg(&self, msg: Msg) -> TwilioResult<MsgResp> {
-        unimplemented!()
+    pub fn message<'a>(&'a self, msg: Msg<'a>) -> SendMsg<'a> {
+        SendMsg { msg, client: &self }
     }
 
     fn request<U, D>(
@@ -108,6 +107,71 @@ impl Twilio {
     }
 }
 
+pub trait TwilioReq {
+    fn get_sid(&self) -> &str;
+    fn get_core(&self) -> Result<cell::RefMut<Core>, cell::BorrowMutError>;
+    fn get_client(&self) -> Rc<Client<HttpsConnector<HttpConnector>, hyper::Body>>;
+    fn send<D>(&self) -> Result<(hyper::Headers, hyper::StatusCode, Option<D>), TwilioErr>
+    where
+        D: serde::de::DeserializeOwned;
+}
+
+pub fn encode_pairs<I, K, V>(pairs: I) -> Option<String>
+where
+    K: AsRef<str>,
+    V: AsRef<str>,
+    I: IntoIterator,
+    I::Item: Borrow<(K, V)>,
+{
+    let mut partial = form_urlencoded::Serializer::new(String::new());
+    for pair in pairs.into_iter() {
+        let &(ref k, ref v) = pair.borrow();
+        partial.append_pair(k.as_ref(), v.as_ref());
+    }
+    let encoded = partial.finish();
+    Some(encoded)
+}
+
+pub fn request<U, D, S>(
+    this: &S,
+    method: Method,
+    url: U,
+    t_type: String,
+) -> Result<(hyper::Headers, hyper::StatusCode, Option<D>), TwilioErr>
+where
+    U: AsRef<str>,
+    S: TwilioReq,
+    D: serde::de::DeserializeOwned,
+{
+    let mut core_ref = this.get_core()?;
+    let url = format!("{}/{}/{}.json", BASE, this.get_sid(), url.as_ref()).parse::<hyper::Uri>()?;
+    let content_type_header = header::ContentType::form_url_encoded();
+    let mut request = Request::new(method, url);
+    request.set_body(t_type);
+    request.headers_mut().set(content_type_header);
+    let fut_req = this.get_client().request(request).and_then(|res| {
+        println!("Response: {}", res.status());
+        println!("Headers: \n{}", res.headers());
+
+        let header = res.headers().clone();
+        let status = res.status();
+
+        res.body()
+            .fold(Vec::new(), |mut v, chunk| {
+                v.extend(&chunk[..]);
+                future::ok::<_, hyper::Error>(v)
+            })
+            .map(move |chunks| {
+                if chunks.is_empty() {
+                    Ok((header, status, None))
+                } else {
+                    Ok((header, status, Some(serde_json::from_slice(&chunks)?)))
+                }
+            })
+    });
+    core_ref.run(fut_req)?
+}
+
 // Errors
 #[derive(Debug)]
 pub enum TwilioErr {
@@ -147,38 +211,19 @@ impl fmt::Display for TwilioErr {
     }
 }
 
-impl From<io::Error> for TwilioErr {
-    fn from(e: io::Error) -> Self {
-        Io(e)
-    }
+macro_rules! from {
+    ($x:ty, $variant:ident) => {
+        impl From<$x> for TwilioErr {
+            fn from(e: $x) -> Self {
+                $variant(e)
+            }
+        }
+    };
 }
 
-impl From<hyper_tls::Error> for TwilioErr {
-    fn from(e: hyper_tls::Error) -> Self {
-        TlsErr(e)
-    }
-}
-
-impl From<hyper::error::UriError> for TwilioErr {
-    fn from(e: hyper::error::UriError) -> Self {
-        UrlParse(e)
-    }
-}
-
-impl From<serde_json::Error> for TwilioErr {
-    fn from(e: serde_json::Error) -> Self {
-        SerdeErr(e)
-    }
-}
-
-impl From<hyper::Error> for TwilioErr {
-    fn from(e: hyper::Error) -> Self {
-        NetworkErr(e)
-    }
-}
-
-impl From<cell::BorrowMutError> for TwilioErr {
-    fn from(e: cell::BorrowMutError) -> Self {
-        BorrowErr(e)
-    }
-}
+from!(cell::BorrowMutError, BorrowErr);
+from!(hyper::Error, NetworkErr);
+from!(serde_json::Error, SerdeErr);
+from!(hyper::error::UriError, UrlParse);
+from!(hyper_tls::Error, TlsErr);
+from!(io::Error, Io);

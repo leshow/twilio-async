@@ -5,6 +5,7 @@ pub struct Url {
     pub base: String,
     pub query: Option<String>,
 }
+
 impl Url {
     pub fn new<S: Into<String>>(base: S) -> Self {
         Url {
