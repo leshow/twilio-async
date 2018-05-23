@@ -8,6 +8,8 @@ extern crate serde_json;
 extern crate tokio_core;
 extern crate url;
 
+#[macro_use]
+mod macros;
 mod message;
 mod request;
 mod twiliourl;
@@ -26,8 +28,6 @@ use {
     }, tokio_core::reactor::Core,
     url::form_urlencoded,
 };
-
-static BASE: &str = "https://api.twilio.com/2010-04-01/Accounts/";
 
 pub struct Twilio {
     sid: String,
@@ -66,52 +66,62 @@ impl Twilio {
         SendMsg { msg, client: &self }
     }
 
-    fn request<U, D>(
-        &self,
+    // fn request<U, D>(
+    //     &self,
+    //     method: Method,
+    //     url: U,
+    //     t_type: RequestType,
+    // ) -> Result<(hyper::Headers, hyper::StatusCode, Option<D>), TwilioErr>
+    // where
+    //     U: AsRef<str>,
+    //     D: serde::de::DeserializeOwned,
+    // {
+    //     let mut core_ref = self.core.try_borrow_mut()?;
+    //     let url = format!("{}/{}/{}.json", BASE, self.sid, url.as_ref()).parse::<hyper::Uri>()?;
+    //     let content_type_header = header::ContentType::form_url_encoded();
+    //     let mut request = Request::new(method, url);
+    //     request.set_body(t_type.to_string());
+    //     request.headers_mut().set(content_type_header);
+    //     request.headers_mut().set(self.auth.clone());
+    //     let fut_req = self.client.request(request).and_then(|res| {
+    //         println!("Response: {}", res.status());
+    //         println!("Headers: \n{}", res.headers());
+
+    //         let header = res.headers().clone();
+    //         let status = res.status();
+
+    //         res.body()
+    //             .fold(Vec::new(), |mut v, chunk| {
+    //                 v.extend(&chunk[..]);
+    //                 future::ok::<_, hyper::Error>(v)
+    //             })
+    //             .map(move |chunks| {
+    //                 if chunks.is_empty() {
+    //                     Ok((header, status, None))
+    //                 } else {
+    //                     Ok((header, status, Some(serde_json::from_slice(&chunks)?)))
+    //                 }
+    //             })
+    //     });
+
+    //     core_ref.run(fut_req)?
+    // }
+}
+
+pub trait Execute {
+    fn execute<U, D>(
+        self,
         method: Method,
         url: U,
-        t_type: RequestType,
+        t_type: String,
     ) -> Result<(hyper::Headers, hyper::StatusCode, Option<D>), TwilioErr>
     where
         U: AsRef<str>,
-        D: serde::de::DeserializeOwned,
-    {
-        let mut core_ref = self.core.try_borrow_mut()?;
-        let url = format!("{}/{}/{}.json", BASE, self.sid, url.as_ref()).parse::<hyper::Uri>()?;
-        let content_type_header = header::ContentType::form_url_encoded();
-        let mut request = Request::new(method, url);
-        request.set_body(t_type.to_string());
-        request.headers_mut().set(content_type_header);
-        let fut_req = self.client.request(request).and_then(|res| {
-            println!("Response: {}", res.status());
-            println!("Headers: \n{}", res.headers());
-
-            let header = res.headers().clone();
-            let status = res.status();
-
-            res.body()
-                .fold(Vec::new(), |mut v, chunk| {
-                    v.extend(&chunk[..]);
-                    future::ok::<_, hyper::Error>(v)
-                })
-                .map(move |chunks| {
-                    if chunks.is_empty() {
-                        Ok((header, status, None))
-                    } else {
-                        Ok((header, status, Some(serde_json::from_slice(&chunks)?)))
-                    }
-                })
-        });
-
-        core_ref.run(fut_req)?
-    }
+        D: serde::de::DeserializeOwned;
 }
 
-pub trait TwilioReq {
-    fn get_sid(&self) -> &str;
-    fn get_core(&self) -> Result<cell::RefMut<Core>, cell::BorrowMutError>;
-    fn get_client(&self) -> Rc<Client<HttpsConnector<HttpConnector>, hyper::Body>>;
-    fn send<D>(&self) -> Result<(hyper::Headers, hyper::StatusCode, Option<D>), TwilioErr>
+pub trait TwilioReq: Execute {
+    fn send<D>(self) -> Result<(hyper::Headers, hyper::StatusCode, Option<D>), TwilioErr>
     where
         D: serde::de::DeserializeOwned;
 }
@@ -130,46 +140,6 @@ where
     }
     let encoded = partial.finish();
     Some(encoded)
-}
-
-pub fn request<U, D, S>(
-    this: &S,
-    method: Method,
-    url: U,
-    t_type: String,
-) -> Result<(hyper::Headers, hyper::StatusCode, Option<D>), TwilioErr>
-where
-    U: AsRef<str>,
-    S: TwilioReq,
-    D: serde::de::DeserializeOwned,
-{
-    let mut core_ref = this.get_core()?;
-    let url = format!("{}/{}/{}.json", BASE, this.get_sid(), url.as_ref()).parse::<hyper::Uri>()?;
-    let content_type_header = header::ContentType::form_url_encoded();
-    let mut request = Request::new(method, url);
-    request.set_body(t_type);
-    request.headers_mut().set(content_type_header);
-    let fut_req = this.get_client().request(request).and_then(|res| {
-        println!("Response: {}", res.status());
-        println!("Headers: \n{}", res.headers());
-
-        let header = res.headers().clone();
-        let status = res.status();
-
-        res.body()
-            .fold(Vec::new(), |mut v, chunk| {
-                v.extend(&chunk[..]);
-                future::ok::<_, hyper::Error>(v)
-            })
-            .map(move |chunks| {
-                if chunks.is_empty() {
-                    Ok((header, status, None))
-                } else {
-                    Ok((header, status, Some(serde_json::from_slice(&chunks)?)))
-                }
-            })
-    });
-    core_ref.run(fut_req)?
 }
 
 // Errors
@@ -209,16 +179,6 @@ impl fmt::Display for TwilioErr {
             BorrowErr(ref e) => write!(f, "Error trying to get client reference. {}", e),
         }
     }
-}
-
-macro_rules! from {
-    ($x:ty, $variant:ident) => {
-        impl From<$x> for TwilioErr {
-            fn from(e: $x) -> Self {
-                $variant(e)
-            }
-        }
-    };
 }
 
 from!(cell::BorrowMutError, BorrowErr);

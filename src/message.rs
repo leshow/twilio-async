@@ -1,9 +1,6 @@
-use hyper::{self, client::HttpConnector, Client, Method};
-use hyper_tls::HttpsConnector;
+use hyper::{self, Method};
 use serde;
-use std::{cell, rc::Rc};
-use tokio_core::reactor::Core;
-use {request, Twilio, TwilioErr, TwilioReq};
+use {Execute, Twilio, TwilioErr, TwilioReq};
 
 pub struct Msg<'a> {
     pub from: &'a str,
@@ -51,20 +48,14 @@ pub struct SendMsg<'a> {
     pub client: &'a Twilio,
 }
 
+execute!(SendMsg);
+
 impl<'a> TwilioReq for SendMsg<'a> {
-    fn get_sid(&self) -> &str {
-        &self.client.sid[..]
-    }
-    fn get_core(&self) -> Result<cell::RefMut<Core>, cell::BorrowMutError> {
-        self.client.core.try_borrow_mut()
-    }
-    fn get_client(&self) -> Rc<Client<HttpsConnector<HttpConnector>, hyper::Body>> {
-        self.client.client.clone()
-    }
-    fn send<D>(&self) -> Result<(hyper::Headers, hyper::StatusCode, Option<D>), TwilioErr>
+    fn send<D>(self) -> Result<(hyper::Headers, hyper::StatusCode, Option<D>), TwilioErr>
     where
         D: serde::de::DeserializeOwned,
     {
-        request(self, Method::Post, "Messages", self.msg.to_string())
+        let msg = self.msg.to_string();
+        self.execute(Method::Post, "Messages", msg)
     }
 }
