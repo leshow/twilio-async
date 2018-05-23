@@ -16,8 +16,7 @@ impl<'a> Msg<'a> {
 
 impl<'a> ToString for Msg<'a> {
     fn to_string(&self) -> String {
-        super::encode_pairs([("To", self.to), ("From", self.from), ("Body", self.body)].iter())
-            .unwrap()
+        super::encode_pairs(&[("To", self.to), ("From", self.from), ("Body", self.body)]).unwrap()
     }
 }
 

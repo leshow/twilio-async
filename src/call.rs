@@ -12,7 +12,6 @@ impl<'a> Call<'a> {
 
 impl<'a> ToString for Call<'a> {
     fn to_string(&self) -> String {
-        super::encode_pairs([("To", self.to), ("From", self.from), ("Url", self.url)].iter())
-            .unwrap()
+        super::encode_pairs(&[("To", self.to), ("From", self.from), ("Url", self.url)]).unwrap()
     }
 }
