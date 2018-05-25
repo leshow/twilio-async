@@ -121,10 +121,9 @@ pub trait Execute {
         D: for<'de> serde::Deserialize<'de>;
 }
 
-pub trait TwilioReq: Execute {
-    fn send<D>(self) -> Result<(hyper::Headers, hyper::StatusCode, Option<D>), TwilioErr>
-    where
-        D: for<'de> serde::Deserialize<'de>;
+pub trait TwilioRequest: Execute {
+    type Resp: for<'de> serde::Deserialize<'de>;
+    fn send(self) -> Result<(hyper::Headers, hyper::StatusCode, Option<Self::Resp>), TwilioErr>;
 }
 
 pub fn encode_pairs<I, K, V>(pairs: I) -> Option<String>

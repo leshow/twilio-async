@@ -1,6 +1,6 @@
 use hyper::{self, Method};
 use serde;
-use {Execute, Twilio, TwilioErr, TwilioReq};
+use {encode_pairs, Execute, Twilio, TwilioErr, TwilioRequest};
 
 pub struct Msg<'a> {
     pub from: &'a str,
@@ -23,15 +23,14 @@ impl<'a> Msg<'a> {
 impl<'a> ToString for Msg<'a> {
     fn to_string(&self) -> String {
         match self.media_url {
-            Some(m_url) => super::encode_pairs(&[
+            Some(m_url) => encode_pairs(&[
                 ("To", self.to),
                 ("From", self.from),
                 ("Body", self.body),
                 ("MediaUrl", m_url),
             ]).unwrap(),
             None => {
-                super::encode_pairs(&[("To", self.to), ("From", self.from), ("Body", self.body)])
-                    .unwrap()
+                encode_pairs(&[("To", self.to), ("From", self.from), ("Body", self.body)]).unwrap()
             }
         }
     }
@@ -57,6 +56,9 @@ pub struct MsgResp {
     pub body: Option<String>,
     pub sid: String,
     pub status: Option<MsgStatus>,
+    pub media_url: String,
+    pub price: String,
+    pub price_unit: String,
 }
 
 pub struct SendMsg<'a> {
@@ -72,11 +74,9 @@ impl<'a> SendMsg<'a> {
 
 execute!(SendMsg);
 
-impl<'a> TwilioReq for SendMsg<'a> {
-    fn send<D>(self) -> Result<(hyper::Headers, hyper::StatusCode, Option<D>), TwilioErr>
-    where
-        D: for<'de> serde::Deserialize<'de>,
-    {
+impl<'a> TwilioRequest for SendMsg<'a> {
+    type Resp = MsgResp;
+    fn send(self) -> Result<(hyper::Headers, hyper::StatusCode, Option<MsgResp>), TwilioErr> {
         let msg = self.msg.to_string();
         self.execute(Method::Post, "Messages.json", msg)
     }
