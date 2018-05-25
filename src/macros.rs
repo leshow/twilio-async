@@ -14,11 +14,11 @@ macro_rules! execute {
             ) -> Result<(hyper::Headers, hyper::StatusCode, Option<D>), TwilioErr>
             where
                 U: AsRef<str>,
-                D: serde::de::DeserializeOwned,
+                D: for<'de> serde::Deserialize<'de>,
             {
                 let mut core_ref = self.client.core.try_borrow_mut()?;
-                let url = format!("{}/{}/{}.json", BASE, self.client.sid, url.as_ref())
-                    .parse::<hyper::Uri>()?;
+                let url =
+                    format!("{}/{}/{}", BASE, self.client.sid, url.as_ref()).parse::<hyper::Uri>()?;
                 let content_type_header = header::ContentType::form_url_encoded();
                 let mut request = Request::new(method, url);
                 request.set_body(t_type);

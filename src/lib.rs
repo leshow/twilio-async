@@ -1,4 +1,4 @@
-#[allow(dead_code)]
+#![allow(dead_code, unused_imports)]
 #[macro_use]
 extern crate serde_derive;
 extern crate futures;
@@ -118,13 +118,13 @@ pub trait Execute {
     ) -> Result<(hyper::Headers, hyper::StatusCode, Option<D>), TwilioErr>
     where
         U: AsRef<str>,
-        D: serde::de::DeserializeOwned;
+        D: for<'de> serde::Deserialize<'de>;
 }
 
 pub trait TwilioReq: Execute {
     fn send<D>(self) -> Result<(hyper::Headers, hyper::StatusCode, Option<D>), TwilioErr>
     where
-        D: serde::de::DeserializeOwned;
+        D: for<'de> serde::Deserialize<'de>;
 }
 
 pub fn encode_pairs<I, K, V>(pairs: I) -> Option<String>
