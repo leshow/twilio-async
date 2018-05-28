@@ -114,6 +114,26 @@ where
     Some(encoded)
 }
 
+pub fn url_encode<I, K, V>(pairs: I) -> String
+where
+    K: AsRef<str>,
+    V: AsRef<str>,
+    I: IntoIterator,
+    I::Item: Borrow<(K, V)>,
+{
+    pairs
+        .into_iter()
+        .map(|pair| {
+            let &(ref k, ref v) = pair.borrow();
+            format!("{}={}", k.as_ref(), v.as_ref())
+        })
+        .fold(String::new(), |mut acc, item| {
+            acc.push_str(&item);
+            acc.push_str("&");
+            acc
+        })
+}
+
 // Errors
 #[derive(Debug)]
 pub enum TwilioErr {

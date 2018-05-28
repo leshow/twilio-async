@@ -1,6 +1,6 @@
 use hyper::{self, Method};
 use serde;
-use {encode_pairs, Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
+use {encode_pairs, url_encode, Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
 
 pub struct Msg<'a> {
     pub from: &'a str,
@@ -141,12 +141,65 @@ pub struct Messages<'a> {
     pub client: &'a Twilio,
 }
 
+impl<'a> Messages<'a> {
+    pub fn between(self, from: &'a str, to: &'a str) -> MessagesDetails<'a> {
+        MessagesDetails {
+            client: &self.client,
+            from: Some(from),
+            to: Some(to),
+            date_sent: None,
+        }
+    }
+    pub fn on(self, date_sent: &'a str) -> MessagesDetails<'a> {
+        MessagesDetails {
+            client: &self.client,
+            from: None,
+            to: None,
+            date_sent: Some(date_sent),
+        }
+    }
+}
+
 execute!(Messages);
 
 impl<'a> TwilioRequest for Messages<'a> {
     type Resp = ListAllMsgs;
     fn send(self) -> TwilioResp<Self::Resp> {
         self.execute(Method::Get, "Messages.json", None)
+    }
+}
+
+pub struct MessagesDetails<'a> {
+    pub client: &'a Twilio,
+    pub from: Option<&'a str>,
+    pub to: Option<&'a str>,
+    pub date_sent: Option<&'a str>,
+}
+
+impl<'a> ToString for MessagesDetails<'a> {
+    fn to_string(&self) -> String {
+        let mut pairs = Vec::new();
+        if let Some(from) = self.from {
+            pairs.push(("From", from));
+        }
+        if let Some(to) = self.to {
+            pairs.push(("To", to));
+        }
+        if let Some(date_sent) = self.date_sent {
+            pairs.push(("DateSent", date_sent));
+        }
+        // does this have to be different? will the encode_pairs work here?
+        url_encode(pairs)
+    }
+}
+
+execute!(MessagesDetails);
+
+impl<'a> TwilioRequest for MessagesDetails<'a> {
+    type Resp = ListAllMsgs;
+    fn send(self) -> TwilioResp<Self::Resp> {
+        let url = format!("Messages.json?{}", self.to_string());
+        self.execute(Method::Get, url, None)
     }
 }
 
