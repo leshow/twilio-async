@@ -58,8 +58,10 @@ pub struct MsgResp {
     pub status: Option<MsgStatus>,
     pub media_url: String,
     pub price: String,
-    pub price_unit: String,
     pub uri: String,
+    pub date_created: String,
+    pub date_sent: String,
+    pub date_updated: String,
 }
 
 // for outbound sms
@@ -85,17 +87,46 @@ impl<'a> TwilioRequest for SendMsg<'a> {
 }
 
 // to get
-pub struct GetMessages<'a> {
+pub struct GetMessage<'a> {
     pub message_sid: &'a str,
     pub client: &'a Twilio,
 }
 
-execute!(GetMessages);
+execute!(GetMessage);
 
-impl<'a> TwilioRequest for GetMessages<'a> {
+impl<'a> TwilioRequest for GetMessage<'a> {
     type Resp = MsgResp;
     fn send(self) -> Result<(hyper::Headers, hyper::StatusCode, Option<MsgResp>), TwilioErr> {
         let msg_sid = format!("{}.json", self.message_sid);
-        self.execute(Method::Post, msg_sid, None)
+        self.execute(Method::Get, msg_sid, None)
     }
+}
+
+impl<'a> GetMessage<'a> {
+    pub fn redact(self) -> Result<(hyper::Headers, hyper::StatusCode, Option<MsgResp>), TwilioErr> {
+        let msg_sid = format!("{}.json", self.message_sid);
+        self.execute(Method::Post, msg_sid, Some(format!("Body=")))
+    }
+}
+
+pub struct Messages<'a> {
+    pub client: &'a Twilio,
+}
+
+execute!(Messages);
+
+impl<'a> TwilioRequest for Messages<'a> {
+    type Resp = MsgResp;
+    fn send(self) -> Result<(hyper::Headers, hyper::StatusCode, Option<MsgResp>), TwilioErr> {
+        self.execute(Method::Get, "Messages.json", None)
+    }
+}
+
+pub struct ListAllMsgs {
+    pub msgs: Vec<MsgResp>,
+    pub num_pages: usize,
+    pub page: usize,
+    pub page_size: usize,
+    pub total: usize,
+    pub uri: String,
 }

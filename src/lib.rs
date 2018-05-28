@@ -67,8 +67,8 @@ impl Twilio {
         SendMsg { msg, client: &self }
     }
 
-    pub fn messages<'a>(&'a self, message_sid: &'a str) -> GetMessages<'a> {
-        GetMessages {
+    pub fn messages<'a>(&'a self, message_sid: &'a str) -> GetMessage<'a> {
+        GetMessage {
             message_sid,
             client: &self,
         }
