@@ -38,6 +38,8 @@ pub struct Twilio {
     core: Rc<RefCell<Core>>,
 }
 
+pub type TwilioResp<T> = Result<(hyper::Headers, hyper::StatusCode, Option<T>), TwilioErr>;
+
 impl Twilio {
     pub fn new<S>(sid: S, token: S) -> TwilioResult<Twilio>
     where
@@ -63,57 +65,20 @@ impl Twilio {
         })
     }
 
-    pub fn message<'a>(&'a self, msg: Msg<'a>) -> SendMsg<'a> {
+    pub fn send_msg<'a>(&'a self, msg: Msg<'a>) -> SendMsg<'a> {
         SendMsg { msg, client: &self }
     }
 
-    pub fn messages<'a>(&'a self, message_sid: &'a str) -> GetMessage<'a> {
+    pub fn msg<'a>(&'a self, message_sid: &'a str) -> GetMessage<'a> {
         GetMessage {
             message_sid,
             client: &self,
         }
     }
 
-    // fn request<U, D>(
-    //     &self,
-    //     method: Method,
-    //     url: U,
-    //     t_type: RequestType,
-    // ) -> Result<(hyper::Headers, hyper::StatusCode, Option<D>), TwilioErr>
-    // where
-    //     U: AsRef<str>,
-    //     D: serde::de::DeserializeOwned,
-    // {
-    //     let mut core_ref = self.core.try_borrow_mut()?;
-    //     let url = format!("{}/{}/{}.json", BASE, self.sid, url.as_ref()).parse::<hyper::Uri>()?;
-    //     let content_type_header = header::ContentType::form_url_encoded();
-    //     let mut request = Request::new(method, url);
-    //     request.set_body(t_type.to_string());
-    //     request.headers_mut().set(content_type_header);
-    //     request.headers_mut().set(self.auth.clone());
-    //     let fut_req = self.client.request(request).and_then(|res| {
-    //         println!("Response: {}", res.status());
-    //         println!("Headers: \n{}", res.headers());
-
-    //         let header = res.headers().clone();
-    //         let status = res.status();
-
-    //         res.body()
-    //             .fold(Vec::new(), |mut v, chunk| {
-    //                 v.extend(&chunk[..]);
-    //                 future::ok::<_, hyper::Error>(v)
-    //             })
-    //             .map(move |chunks| {
-    //                 if chunks.is_empty() {
-    //                     Ok((header, status, None))
-    //                 } else {
-    //                     Ok((header, status, Some(serde_json::from_slice(&chunks)?)))
-    //                 }
-    //             })
-    //     });
-
-    //     core_ref.run(fut_req)?
-    // }
+    pub fn msgs<'a>(&'a self) -> Messages<'a> {
+        Messages { client: &self }
+    }
 }
 
 pub trait Execute {
