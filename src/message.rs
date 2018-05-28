@@ -80,13 +80,14 @@ impl<'a> TwilioRequest for SendMsg<'a> {
     type Resp = MsgResp;
     fn send(self) -> Result<(hyper::Headers, hyper::StatusCode, Option<MsgResp>), TwilioErr> {
         let msg = self.msg.to_string();
-        self.execute(Method::Post, "Messages.json", msg)
+        self.execute(Method::Post, "Messages.json", Some(msg))
     }
 }
 
 // to get
 pub struct GetMessages<'a> {
-    message_sid: &'a str,
+    pub message_sid: &'a str,
+    pub client: &'a Twilio,
 }
 
 execute!(GetMessages);
@@ -94,6 +95,7 @@ execute!(GetMessages);
 impl<'a> TwilioRequest for GetMessages<'a> {
     type Resp = MsgResp;
     fn send(self) -> Result<(hyper::Headers, hyper::StatusCode, Option<MsgResp>), TwilioErr> {
-        self.execute(Method::Post, format!("{}.json", self.message_sid))
+        let msg_sid = format!("{}.json", self.message_sid);
+        self.execute(Method::Post, msg_sid, None)
     }
 }

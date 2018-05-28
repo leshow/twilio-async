@@ -1,27 +1,29 @@
 macro_rules! execute {
     ($x:ident) => {
-        use {
-            futures::{future, Future, Stream}, hyper::{header, Request}, serde_json,
-        };
-        const BASE: &str = "https://api.twilio.com/2010-04-01/Accounts/";
-
         impl<'a> Execute for $x<'a> {
             fn execute<U, D>(
                 self,
                 method: Method,
                 url: U,
-                t_type: String,
+                body: Option<String>,
             ) -> Result<(hyper::Headers, hyper::StatusCode, Option<D>), TwilioErr>
             where
                 U: AsRef<str>,
                 D: for<'de> serde::Deserialize<'de>,
             {
+                use {
+                    futures::{future, Future, Stream}, hyper::{header, Request}, serde_json,
+                };
+                const BASE: &str = "https://api.twilio.com/2010-04-01/Accounts/";
+
                 let mut core_ref = self.client.core.try_borrow_mut()?;
                 let url =
                     format!("{}/{}/{}", BASE, self.client.sid, url.as_ref()).parse::<hyper::Uri>()?;
                 let content_type_header = header::ContentType::form_url_encoded();
                 let mut request = Request::new(method, url);
-                request.set_body(t_type);
+                if let Some(body) = body {
+                    request.set_body(body);
+                }
                 request.headers_mut().set(content_type_header);
                 request.headers_mut().set(self.client.auth.clone());
                 let fut_req = self.client.client.request(request).and_then(|res| {
@@ -57,5 +59,14 @@ macro_rules! from {
                 $variant(e)
             }
         }
+    };
+}
+
+macro_rules! imports {
+    () => {
+        use {
+            futures::{future, Future, Stream}, hyper::{header, Request}, serde_json,
+        };
+        const BASE: &str = "https://api.twilio.com/2010-04-01/Accounts/";
     };
 }

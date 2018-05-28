@@ -18,7 +18,7 @@ mod twiliourl;
 use self::TwilioErr::*;
 use message::*;
 use request::*;
-use {
+pub use {
     futures::{future, Future, Stream},
     hyper::{
         client::HttpConnector, header::{self, Authorization, Basic}, Client, Method, Request,
@@ -65,6 +65,13 @@ impl Twilio {
 
     pub fn message<'a>(&'a self, msg: Msg<'a>) -> SendMsg<'a> {
         SendMsg { msg, client: &self }
+    }
+
+    pub fn messages<'a>(&'a self, message_sid: &'a str) -> GetMessages<'a> {
+        GetMessages {
+            message_sid,
+            client: &self,
+        }
     }
 
     // fn request<U, D>(
@@ -114,7 +121,7 @@ pub trait Execute {
         self,
         method: Method,
         url: U,
-        t_type: String,
+        body: Option<String>,
     ) -> Result<(hyper::Headers, hyper::StatusCode, Option<D>), TwilioErr>
     where
         U: AsRef<str>,
