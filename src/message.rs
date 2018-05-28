@@ -59,8 +59,10 @@ pub struct MsgResp {
     pub media_url: String,
     pub price: String,
     pub price_unit: String,
+    pub uri: String,
 }
 
+// for outbound sms
 pub struct SendMsg<'a> {
     pub msg: Msg<'a>,
     pub client: &'a Twilio,
@@ -79,5 +81,19 @@ impl<'a> TwilioRequest for SendMsg<'a> {
     fn send(self) -> Result<(hyper::Headers, hyper::StatusCode, Option<MsgResp>), TwilioErr> {
         let msg = self.msg.to_string();
         self.execute(Method::Post, "Messages.json", msg)
+    }
+}
+
+// to get
+pub struct GetMessages<'a> {
+    message_sid: &'a str,
+}
+
+execute!(GetMessages);
+
+impl<'a> TwilioRequest for GetMessages<'a> {
+    type Resp = MsgResp;
+    fn send(self) -> Result<(hyper::Headers, hyper::StatusCode, Option<MsgResp>), TwilioErr> {
+        self.execute(Method::Post, format!("{}.json", self.message_sid))
     }
 }
