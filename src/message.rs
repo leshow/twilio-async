@@ -105,7 +105,7 @@ impl<'a> TwilioRequest for GetMessage<'a> {
 impl<'a> GetMessage<'a> {
     pub fn redact(self) -> TwilioResp<MsgResp> {
         let msg_sid = format!("{}.json", self.message_sid);
-        self.execute(Method::Post, msg_sid, Some(format!("Body=")))
+        self.execute(Method::Post, msg_sid, Some("Body=".into()))
     }
     pub fn get_media(self) -> TwilioResp<MediaResp> {
         let msg_sid = format!("Messages/{}/Media.json", self.message_sid);

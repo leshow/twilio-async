@@ -64,12 +64,3 @@ macro_rules! from {
         }
     };
 }
-
-macro_rules! imports {
-    () => {
-        use {
-            futures::{future, Future, Stream}, hyper::{header, Request}, serde_json,
-        };
-        const BASE: &str = "https://api.twilio.com/2010-04-01/Accounts/";
-    };
-}

@@ -106,7 +106,7 @@ where
     I::Item: Borrow<(K, V)>,
 {
     let mut partial = form_urlencoded::Serializer::new(String::new());
-    for pair in pairs.into_iter() {
+    for pair in pairs {
         let &(ref k, ref v) = pair.borrow();
         partial.append_pair(k.as_ref(), v.as_ref());
     }

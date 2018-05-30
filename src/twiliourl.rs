@@ -21,7 +21,7 @@ impl Url {
         I::Item: Borrow<(K, V)>,
     {
         let mut partial = url::form_urlencoded::Serializer::new(String::new());
-        for pair in pairs.into_iter() {
+        for pair in pairs {
             let &(ref k, ref v) = pair.borrow();
             partial.append_pair(k.as_ref(), v.as_ref());
         }
@@ -34,7 +34,7 @@ impl ToString for Url {
     fn to_string(&self) -> String {
         match self.query {
             Some(ref q) => format!("{}?{}", self.base, q),
-            None => format!("{}", self.base),
+            None => self.base.to_string(),
         }
     }
 }
