@@ -32,7 +32,6 @@ pub use {
 
 pub struct Twilio {
     sid: String,
-    token: String,
     auth: Authorization<Basic>,
     client: Rc<Client<HttpsConnector<HttpConnector>, hyper::Body>>,
     core: Rc<RefCell<Core>>,
@@ -48,17 +47,15 @@ impl Twilio {
         let core = Core::new()?;
         let handle = core.handle();
         let username = sid.into();
-        let pwd = token.into();
         let client = Client::configure()
             .connector(HttpsConnector::new(4, &handle)?)
             .build(&handle);
 
         Ok(Twilio {
             sid: username.clone(),
-            token: pwd.clone(),
             auth: Authorization(Basic {
                 username,
-                password: Some(pwd),
+                password: Some(token.into()),
             }),
             client: Rc::new(client),
             core: Rc::new(RefCell::new(core)),
