@@ -63,6 +63,12 @@ impl<'a> ToString for Call<'a> {
                 pairs.push(("Record", "true"));
             }
         }
+        if let Some(cb) = self.callback {
+            pairs.push(("Callback", cb.to_string()));
+        }
+        pair!(self, send_digits, "SendDigits", pairs);
+        pair!(self, timeout, "Timeout", pairs);
+        pair!(self, status_callback, "StatusCallback", pairs);
 
         encode_pairs(pairs).unwrap()
     }
