@@ -62,8 +62,18 @@ impl Twilio {
         })
     }
 
-    pub fn send_msg<'a>(&'a self, msg: Msg<'a>) -> SendMsg<'a> {
-        SendMsg { msg, client: &self }
+    pub fn send_msg<'a>(&'a self, from: &'a str, to: &'a str, body: &'a str) -> SendMsg<'a> {
+        SendMsg {
+            msg: Msg::new(from, to, body),
+            client: &self,
+        }
+    }
+
+    pub fn send_media<'a>(&'a self, from: &'a str, to: &'a str, body: &'a str) -> SendMsg<'a> {
+        SendMsg {
+            msg: Msg::new(from, to, body),
+            client: &self,
+        }
     }
 
     pub fn msg<'a>(&'a self, message_sid: &'a str) -> GetMessage<'a> {

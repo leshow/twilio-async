@@ -5,7 +5,7 @@ use {encode_pairs, url_encode, Execute, Twilio, TwilioErr, TwilioRequest, Twilio
 pub struct Msg<'a> {
     pub from: &'a str,
     pub to: &'a str,
-    pub body: &'a str,
+    pub body: Option<&'a str>,
     pub media_url: Option<&'a str>,
 }
 
@@ -14,25 +14,41 @@ impl<'a> Msg<'a> {
         Msg {
             from,
             to,
-            body,
+            body: Some(body),
             media_url: None,
+        }
+    }
+    pub fn media(from: &'a str, to: &'a str, media_url: &'a str) -> Msg<'a> {
+        Msg {
+            from,
+            to,
+            body: None,
+            media_url: Some(media_url),
         }
     }
 }
 
 impl<'a> ToString for Msg<'a> {
     fn to_string(&self) -> String {
-        match self.media_url {
-            Some(m_url) => encode_pairs(&[
-                ("To", self.to),
-                ("From", self.from),
-                ("Body", self.body),
-                ("MediaUrl", m_url),
-            ]).unwrap(),
-            None => {
-                encode_pairs(&[("To", self.to), ("From", self.from), ("Body", self.body)]).unwrap()
-            }
+        let mut pairs = vec![("To", self.to), ("From", self.from)];
+        if let Some(m_url) = self.media_url {
+            pairs.push(("MediaUrl", m_url));
         }
+        if let Some(body) = self.body {
+            pairs.push(("Body", body));
+        }
+        encode_pairs(pairs).unwrap()
+        // match self.media_url {
+        //     Some(m_url) => encode_pairs(&[
+        //         ("To", self.to),
+        //         ("From", self.from),
+        //         ("Body", self.body),
+        //         ("MediaUrl", m_url),
+        //     ]).unwrap(),
+        //     None => {
+        //         encode_pairs(&[("To", self.to), ("From", self.from), ("Body", self.body)]).unwrap()
+        //     }
+        // }
     }
 }
 
@@ -71,8 +87,12 @@ pub struct SendMsg<'a> {
 }
 
 impl<'a> SendMsg<'a> {
-    fn set_media_url(&mut self, media_url: &'a str) {
+    pub fn set_media_url(&mut self, media_url: &'a str) {
         self.msg.media_url = Some(media_url);
+    }
+
+    pub fn set_body(&mut self, body: &'a str) {
+        self.msg.body = Some(body);
     }
 }
 
@@ -107,7 +127,7 @@ impl<'a> GetMessage<'a> {
         let msg_sid = format!("{}.json", self.message_sid);
         self.execute(Method::Post, msg_sid, Some("Body=".into()))
     }
-    pub fn get_media(self) -> TwilioResp<MediaResp> {
+    pub fn media(self) -> TwilioResp<MediaResp> {
         let msg_sid = format!("Messages/{}/Media.json", self.message_sid);
         self.execute(Method::Get, msg_sid, None)
     }
