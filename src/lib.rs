@@ -17,8 +17,10 @@ mod request;
 mod twiliourl;
 
 use self::TwilioErr::*;
+use call::*;
 use message::*;
 use request::*;
+
 pub use {
     futures::{future, Future, Stream},
     hyper::{
@@ -80,6 +82,13 @@ impl Twilio {
 
     pub fn msgs<'a>(&'a self) -> Messages<'a> {
         Messages { client: &self }
+    }
+
+    pub fn call<'a>(&'a self, from: &'a str, to: &'a str) -> SendCall<'a> {
+        SendCall {
+            call: Call::new(from, to),
+            client: &self,
+        }
     }
 }
 

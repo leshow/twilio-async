@@ -13,12 +13,12 @@ pub struct Call<'a> {
     record: Option<bool>,
     send_digits: Option<&'a str>,
     status_callback: Option<&'a str>,
-    callback: Option<CallbackEvent>,
+    callback_event: Option<CallbackEvent>,
     timeout: Option<i32>,
 }
 
 #[derive(Debug)]
-enum CallbackEvent {
+pub enum CallbackEvent {
     Initiated,
     Ringing,
     Answered,
@@ -26,16 +26,6 @@ enum CallbackEvent {
 }
 
 use self::CallbackEvent::*;
-impl ToString for CallbackEvent {
-    fn to_string(&self) -> String {
-        match *self {
-            Initiated => "initiated".to_string(),
-            Ringing => "ringing".to_string(),
-            Answered => "answered".to_string(),
-            Completed => "completed".to_string(),
-        }
-    }
-}
 
 impl<'a> Call<'a> {
     pub fn new(from: &'a str, to: &'a str) -> Call<'a> {
@@ -63,11 +53,19 @@ impl<'a> ToString for Call<'a> {
                 pairs.push(("Record", "true"));
             }
         }
-        if let Some(cb) = self.callback {
-            pairs.push(("Callback", cb.to_string()));
+        if let Some(ref cb) = self.callback_event {
+            let event = match *cb {
+                Initiated => "initiated",
+                Ringing => "ringing",
+                Answered => "answered",
+                Completed => "completed",
+            };
+            pairs.push(("StatusCallbackEvent", event));
         }
+        // if let Some(timeout) = self.timeout {
+        //     pairs.push(("Timeout", &timeout.to_string())); // can't move out of borrowed
+        // }
         pair!(self, send_digits, "SendDigits", pairs);
-        pair!(self, timeout, "Timeout", pairs);
         pair!(self, status_callback, "StatusCallback", pairs);
 
         encode_pairs(pairs).unwrap()
@@ -85,4 +83,68 @@ pub enum CallStatus {
     failed,
     busy,
     noanswer,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct CallResp {
+    from: String,
+    to: String,
+    sid: String,
+    start_time: String,
+    status: CallStatus,
+    account_sid: String,
+    caller_name: Option<String>,
+    duration: String,
+    price: String,
+    price_unit: String,
+    uri: String,
+    url: String,
+    date_created: String,
+    end_time: String,
+    phone_number_sid: String,
+}
+
+pub struct SendCall<'a> {
+    pub call: Call<'a>,
+    pub client: &'a Twilio,
+}
+
+execute!(SendCall);
+
+impl<'a> TwilioRequest for SendCall<'a> {
+    type Resp = CallResp;
+    fn send(self) -> TwilioResp<Self::Resp> {
+        let call = self.call.to_string();
+        self.execute(Method::Post, "Calls.json", Some(call))
+    }
+}
+
+impl<'a> SendCall<'a> {
+    pub fn url(&mut self, url: &'a str) {
+        self.call.url = Some(url);
+    }
+    pub fn sid(&mut self, sid: &'a str) {
+        self.call.sid = Some(sid);
+    }
+    pub fn callerid(&mut self, callerid: &'a str) {
+        self.call.callerid = Some(callerid);
+    }
+    pub fn machine_detection(&mut self, machine_detection: bool) {
+        self.call.machine_detection = Some(machine_detection);
+    }
+    pub fn record(&mut self, record: bool) {
+        self.call.record = Some(record);
+    }
+    pub fn send_digits(&mut self, send_digits: &'a str) {
+        self.call.send_digits = Some(send_digits);
+    }
+    pub fn status_callback(&mut self, callback: &'a str) {
+        self.call.status_callback = Some(callback);
+    }
+    pub fn callback_event(&mut self, event: CallbackEvent) {
+        self.call.callback_event = Some(event);
+    }
+    pub fn timeout(&mut self, timeout: i32) {
+        self.call.timeout = Some(timeout);
+    }
 }
