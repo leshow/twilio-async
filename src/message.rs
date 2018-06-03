@@ -4,10 +4,10 @@ use {encode_pairs, url_encode, Execute, Twilio, TwilioErr, TwilioRequest, Twilio
 
 #[derive(Default, Debug)]
 pub struct Msg<'a> {
-    pub from: &'a str,
-    pub to: &'a str,
-    pub body: Option<&'a str>,
-    pub media_url: Option<&'a str>,
+    from: &'a str,
+    to: &'a str,
+    body: Option<&'a str>,
+    media_url: Option<&'a str>,
 }
 
 impl<'a> Msg<'a> {
@@ -23,12 +23,8 @@ impl<'a> Msg<'a> {
 impl<'a> ToString for Msg<'a> {
     fn to_string(&self) -> String {
         let mut pairs = vec![("To", self.to), ("From", self.from)];
-        if let Some(m_url) = self.media_url {
-            pairs.push(("MediaUrl", m_url));
-        }
-        if let Some(body) = self.body {
-            pairs.push(("Body", body));
-        }
+        pair!(self, media_url, "MediaUrl", pairs);
+        pair!(self, body, "Body", pairs);
         encode_pairs(pairs).unwrap()
         // match self.media_url {
         //     Some(m_url) => encode_pairs(&[
@@ -59,17 +55,17 @@ pub enum MsgStatus {
 
 #[derive(Debug, Deserialize)]
 pub struct MsgResp {
-    pub from: String,
-    pub to: String,
-    pub body: Option<String>,
-    pub sid: String,
-    pub status: Option<MsgStatus>,
-    pub media_url: String,
-    pub price: String,
-    pub uri: String,
-    pub date_created: String,
-    pub date_sent: String,
-    pub date_updated: String,
+    from: String,
+    to: String,
+    body: Option<String>,
+    sid: String,
+    status: Option<MsgStatus>,
+    media_url: String,
+    price: String,
+    uri: String,
+    date_created: String,
+    date_sent: String,
+    date_updated: String,
 }
 
 // for outbound sms
@@ -128,26 +124,26 @@ impl<'a> GetMessage<'a> {
 
 #[derive(Debug, Deserialize)]
 pub struct MediaResp {
-    pub media_list: Vec<MediaItem>,
-    pub num_pages: i32,
-    pub page: i32,
-    pub page_size: i32,
-    pub start: i32,
-    pub total: i32,
-    pub uri: String,
-    pub account_sid: String,
-    pub message_sid: String,
+    media_list: Vec<MediaItem>,
+    num_pages: i32,
+    page: i32,
+    page_size: i32,
+    start: i32,
+    total: i32,
+    uri: String,
+    account_sid: String,
+    message_sid: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct MediaItem {
-    pub account_sid: String,
-    pub content_type: String,
-    pub sid: String,
-    pub uri: String,
-    pub message_sid: String,
-    pub date_created: String,
-    pub date_update: String,
+    account_sid: String,
+    content_type: String,
+    sid: String,
+    uri: String,
+    message_sid: String,
+    date_created: String,
+    date_update: String,
 }
 
 pub struct Messages<'a> {
@@ -192,15 +188,9 @@ pub struct MessagesDetails<'a> {
 impl<'a> ToString for MessagesDetails<'a> {
     fn to_string(&self) -> String {
         let mut pairs = Vec::new();
-        if let Some(from) = self.from {
-            pairs.push(("From", from));
-        }
-        if let Some(to) = self.to {
-            pairs.push(("To", to));
-        }
-        if let Some(date_sent) = self.date_sent {
-            pairs.push(("DateSent", date_sent));
-        }
+        pair!(self, from, "From", pairs);
+        pair!(self, to, "To", pairs);
+        pair!(self, date_sent, "DateSent", pairs);
         // does this have to be different? will the encode_pairs work here?
         url_encode(pairs)
     }
@@ -218,10 +208,10 @@ impl<'a> TwilioRequest for MessagesDetails<'a> {
 
 #[derive(Debug, Deserialize)]
 pub struct ListAllMsgs {
-    pub msgs: Vec<MsgResp>,
-    pub num_pages: usize,
-    pub page: usize,
-    pub page_size: usize,
-    pub total: usize,
-    pub uri: String,
+    msgs: Vec<MsgResp>,
+    num_pages: usize,
+    page: usize,
+    page_size: usize,
+    total: usize,
+    uri: String,
 }

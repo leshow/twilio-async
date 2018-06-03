@@ -64,3 +64,11 @@ macro_rules! from {
         }
     };
 }
+
+macro_rules! pair {
+    ($x:ident, $field:ident, $name:tt, $vec:ident) => {
+        if let Some($field) = $x.$field {
+            $vec.push(($name, $field));
+        }
+    };
+}
