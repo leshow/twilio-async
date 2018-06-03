@@ -14,7 +14,7 @@ pub struct Call<'a> {
     send_digits: Option<&'a str>,
     status_callback: Option<&'a str>,
     callback_event: Option<CallbackEvent>,
-    timeout: Option<i32>,
+    timeout: Option<&'a str>,
 }
 
 #[derive(Debug)]
@@ -62,9 +62,7 @@ impl<'a> ToString for Call<'a> {
             };
             pairs.push(("StatusCallbackEvent", event));
         }
-        // if let Some(timeout) = self.timeout {
-        //     pairs.push(("Timeout", &timeout.to_string())); // can't move out of borrowed
-        // }
+        pair!(self, timeout, "Timeout", pairs);
         pair!(self, send_digits, "SendDigits", pairs);
         pair!(self, status_callback, "StatusCallback", pairs);
 
