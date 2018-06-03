@@ -2,6 +2,7 @@ use hyper::{self, Method};
 use serde;
 use {encode_pairs, url_encode, Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
 
+#[derive(Default, Debug)]
 pub struct Msg<'a> {
     pub from: &'a str,
     pub to: &'a str,
@@ -10,20 +11,11 @@ pub struct Msg<'a> {
 }
 
 impl<'a> Msg<'a> {
-    pub fn new(from: &'a str, to: &'a str, body: &'a str) -> Msg<'a> {
+    pub fn new(from: &'a str, to: &'a str) -> Msg<'a> {
         Msg {
             from,
             to,
-            body: Some(body),
-            media_url: None,
-        }
-    }
-    pub fn media(from: &'a str, to: &'a str, media_url: &'a str) -> Msg<'a> {
-        Msg {
-            from,
-            to,
-            body: None,
-            media_url: Some(media_url),
+            ..Msg::default()
         }
     }
 }
@@ -81,17 +73,18 @@ pub struct MsgResp {
 }
 
 // for outbound sms
+#[derive(Debug)]
 pub struct SendMsg<'a> {
     pub msg: Msg<'a>,
     pub client: &'a Twilio,
 }
 
 impl<'a> SendMsg<'a> {
-    pub fn set_media_url(&mut self, media_url: &'a str) {
+    pub fn media(&mut self, media_url: &'a str) {
         self.msg.media_url = Some(media_url);
     }
 
-    pub fn set_body(&mut self, body: &'a str) {
+    pub fn body(&mut self, body: &'a str) {
         self.msg.body = Some(body);
     }
 }
@@ -106,7 +99,7 @@ impl<'a> TwilioRequest for SendMsg<'a> {
     }
 }
 
-// to get
+#[derive(Debug)]
 pub struct GetMessage<'a> {
     pub message_sid: &'a str,
     pub client: &'a Twilio,

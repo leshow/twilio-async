@@ -30,6 +30,7 @@ pub use {
     url::form_urlencoded,
 };
 
+#[derive(Debug)]
 pub struct Twilio {
     sid: String,
     auth: Authorization<Basic>,
@@ -62,16 +63,9 @@ impl Twilio {
         })
     }
 
-    pub fn send_msg<'a>(&'a self, from: &'a str, to: &'a str, body: &'a str) -> SendMsg<'a> {
+    pub fn send_msg<'a>(&'a self, from: &'a str, to: &'a str) -> SendMsg<'a> {
         SendMsg {
-            msg: Msg::new(from, to, body),
-            client: &self,
-        }
-    }
-
-    pub fn send_media<'a>(&'a self, from: &'a str, to: &'a str, body: &'a str) -> SendMsg<'a> {
-        SendMsg {
-            msg: Msg::new(from, to, body),
+            msg: Msg::new(from, to),
             client: &self,
         }
     }

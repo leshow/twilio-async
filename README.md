@@ -7,9 +7,9 @@ A fast (presumably), async, twilio API wrapper
 ```rs
 let twilio = Twilio::new(account_sid, token)?;
 // sending a message
-twilio.send_msg("from", "to", "message body").send()?;
+twilio.send_msg("from", "to").body("textbody").send()?;
 // sending a body-less message with media
-twilio.send_media("from", "to", "http://www.example/com/cheeseburger.png").send()?;
+twilio.send_msg("from", "to").media("www.example.com/cheeseburger.png").send()?;
 // get details about a message
 twilio.msg("messagesid").send()?;
 // redact a message
