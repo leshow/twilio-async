@@ -75,11 +75,13 @@ impl<'a> ToString for Call<'a> {
 pub enum CallStatus {
     queued,
     ringing,
+    #[serde(rename = "in-progress")]
     inprogress,
     canceled,
     completed,
     failed,
     busy,
+    #[serde(rename = "no-answer")]
     noanswer,
 }
 

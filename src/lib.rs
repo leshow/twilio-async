@@ -102,6 +102,17 @@ impl Twilio {
     pub fn conferences<'a>(&'a self) -> Conferences<'a> {
         Conferences { client: &self }
     }
+
+    pub fn recording<'a>(&'a self, sid: &'a str) -> GetRecording<'a> {
+        GetRecording {
+            recording: Recording::new(sid),
+            client: &self,
+        }
+    }
+
+    pub fn recordings<'a>(&'a self) -> Recordings<'a> {
+        Recordings { client: &self }
+    }
 }
 
 pub trait Execute {
