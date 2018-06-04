@@ -14,11 +14,13 @@ mod macros;
 mod call;
 mod conference;
 mod message;
+mod recording;
 
 use self::TwilioErr::*;
 use call::*;
 use conference::*;
 use message::*;
+use recording::*;
 
 pub use {
     futures::{future, Future, Stream},
