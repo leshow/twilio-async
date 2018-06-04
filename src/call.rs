@@ -118,13 +118,13 @@ impl<'a> TwilioRequest for SendCall<'a> {
 }
 
 impl<'a> SendCall<'a> {
-    pub fn url(&mut self, url: &'a str) {
+    pub fn url(&'a mut self, url: &'a str) {
         self.call.url = Some(url);
     }
-    pub fn sid(&mut self, sid: &'a str) {
+    pub fn sid(&'a mut self, sid: &'a str) {
         self.call.sid = Some(sid);
     }
-    pub fn callerid(&mut self, callerid: &'a str) {
+    pub fn callerid(&'a mut self, callerid: &'a str) {
         self.call.callerid = Some(callerid);
     }
     pub fn machine_detection(&mut self, machine_detection: bool) {
@@ -133,16 +133,16 @@ impl<'a> SendCall<'a> {
     pub fn record(&mut self, record: bool) {
         self.call.record = Some(record);
     }
-    pub fn send_digits(&mut self, send_digits: &'a str) {
+    pub fn send_digits(&'a mut self, send_digits: &'a str) {
         self.call.send_digits = Some(send_digits);
     }
-    pub fn status_callback(&mut self, callback: &'a str) {
+    pub fn status_callback(&'a mut self, callback: &'a str) {
         self.call.status_callback = Some(callback);
     }
     pub fn callback_event(&mut self, event: CallbackEvent) {
         self.call.callback_event = Some(event);
     }
-    pub fn timeout(&mut self, timeout: i32) {
+    pub fn timeout(&'a mut self, timeout: &'a str) {
         self.call.timeout = Some(timeout);
     }
 }
