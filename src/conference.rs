@@ -8,6 +8,8 @@ pub struct Conference<'a> {
     status: Option<&'a str>,
 }
 
+static COMPLETED: &str = "completed";
+
 impl<'a> Conference<'a> {
     pub fn new(sid: &'a str) -> Conference<'a> {
         Conference { sid, status: None }
@@ -21,8 +23,8 @@ pub struct GetConference<'a> {
 }
 
 impl<'a> GetConference<'a> {
-    pub fn status(&'a mut self, status: &'a str) {
-        self.conference.status = Some(status);
+    pub fn end(&'a mut self) {
+        self.conference.status = Some(COMPLETED);
     }
 }
 
