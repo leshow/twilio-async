@@ -1,3 +1,6 @@
+use {
+    futures::{future, Future, Stream}, hyper::{self, header, Request}, serde, serde_json,
+};
 macro_rules! execute {
     ($x:ident) => {
         impl<'a> Execute for $x<'a> {

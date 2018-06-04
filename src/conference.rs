@@ -1,4 +1,5 @@
-use hyper::Method;
+use hyper::{self, Method};
+use serde;
 use {encode_pairs, Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
 
 #[derive(Debug, Default)]
