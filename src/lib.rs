@@ -12,14 +12,13 @@ extern crate url;
 #[macro_use]
 mod macros;
 mod call;
+mod conference;
 mod message;
-mod request;
-mod twiliourl;
 
 use self::TwilioErr::*;
 use call::*;
+use conference::*;
 use message::*;
-use request::*;
 
 pub use {
     futures::{future, Future, Stream},
@@ -89,6 +88,17 @@ impl Twilio {
             call: Call::new(from, to),
             client: &self,
         }
+    }
+
+    pub fn conference<'a>(&'a self, sid: &'a str) -> GetConference<'a> {
+        GetConference {
+            conference: Conference::new(sid),
+            client: &self,
+        }
+    }
+
+    pub fn conferences<'a>(&'a self) -> Conferences<'a> {
+        Conferences { client: &self }
     }
 }
 
