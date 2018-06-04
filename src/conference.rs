@@ -8,7 +8,7 @@ pub struct Conference<'a> {
     status: Option<&'a str>,
 }
 
-static COMPLETED: &str = "completed";
+const COMPLETED: &str = "completed";
 
 impl<'a> Conference<'a> {
     pub fn new(sid: &'a str) -> Conference<'a> {
