@@ -15,6 +15,7 @@ mod call;
 mod conference;
 mod message;
 mod recording;
+mod twiml;
 
 use self::TwilioErr::*;
 use call::*;

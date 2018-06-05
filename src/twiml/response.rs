@@ -1,4 +1,4 @@
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize)]
 pub struct Response<'a> {
     #[serde(rename = "Say")]
     pub say: Option<Say<'a>>,
@@ -6,13 +6,13 @@ pub struct Response<'a> {
     pub play: Option<Play<'a>>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize)]
 pub struct Say<'a> {
     #[serde(rename = "$value")]
     pub body: &'a str,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize)]
 pub struct Play<'a> {
     #[serde(rename = "$value")]
     pub body: &'a str,
