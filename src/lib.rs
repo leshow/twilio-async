@@ -6,6 +6,7 @@ extern crate hyper;
 extern crate hyper_tls;
 extern crate serde;
 extern crate serde_json;
+extern crate serde_xml_rs;
 extern crate tokio_core;
 extern crate url;
 
@@ -15,7 +16,7 @@ mod call;
 mod conference;
 mod message;
 mod recording;
-mod twiml;
+pub mod twiml;
 
 use self::TwilioErr::*;
 use call::*;
@@ -178,6 +179,8 @@ pub enum TwilioErr {
     NetworkErr(hyper::Error),
     SerdeErr(serde_json::Error),
     BorrowErr(cell::BorrowMutError),
+    SerdeXml(serde_xml_rs::Error),
+    Utf8Err(std::string::FromUtf8Error),
 }
 
 pub type TwilioResult<T> = Result<T, TwilioErr>;
@@ -191,6 +194,8 @@ impl Error for TwilioErr {
             SerdeErr(ref e) => e.description(),
             NetworkErr(ref e) => e.description(),
             BorrowErr(ref e) => e.description(),
+            SerdeXml(ref e) => e.description(),
+            Utf8Err(ref e) => e.description(),
         }
     }
 }
@@ -204,6 +209,8 @@ impl fmt::Display for TwilioErr {
             SerdeErr(ref e) => write!(f, "Serde JSON Error: {}", e),
             NetworkErr(ref e) => write!(f, "There was a network error. {}", e),
             BorrowErr(ref e) => write!(f, "Error trying to get client reference. {}", e),
+            SerdeXml(ref e) => write!(f, "Error serializing XML: {}", e),
+            Utf8Err(ref e) => write!(f, "Error converting to utf-8 string: {}", e),
         }
     }
 }
@@ -214,3 +221,5 @@ from!(serde_json::Error, SerdeErr);
 from!(hyper::error::UriError, UrlParse);
 from!(hyper_tls::Error, TlsErr);
 from!(io::Error, Io);
+from!(serde_xml_rs::Error, SerdeXml);
+from!(std::string::FromUtf8Error, Utf8Err);

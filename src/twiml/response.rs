@@ -1,3 +1,8 @@
+use serde;
+use serde_xml_rs::serialize;
+use serde_xml_rs::Serializer;
+use TwilioResult;
+
 #[derive(Debug, Serialize)]
 pub struct Response<'a> {
     #[serde(rename = "Say")]
@@ -8,12 +13,26 @@ pub struct Response<'a> {
 
 #[derive(Debug, Serialize)]
 pub struct Say<'a> {
+    pub voice: Voice,
+    // #[serde(rename = "loop")]
+    // pub count: i32,
+    // pub language: &'a str,
     #[serde(rename = "$value")]
     pub body: &'a str,
 }
 
 #[derive(Debug, Serialize)]
+#[allow(non_camel_case_types)]
+pub enum Voice {
+    man,
+    woman,
+    alice,
+}
+
+#[derive(Debug, Serialize)]
 pub struct Play<'a> {
+    // #[serde(rename = "loop")]
+    // pub count: i32,
     #[serde(rename = "$value")]
     pub body: &'a str,
 }
@@ -25,10 +44,50 @@ impl<'a> Response<'a> {
             play: None,
         }
     }
-    pub fn say(&'a mut self, body: &'a str) {
-        self.say = Some(Say { body });
+    pub fn say(self, body: &'a str) -> Response<'a> {
+        Response {
+            say: Some(Say::new(body)),
+            ..self
+        }
     }
-    pub fn play(&'a mut self, body: &'a str) {
-        self.play = Some(Play { body });
+    pub fn play(self, body: &'a str) -> Response<'a> {
+        Response {
+            play: Some(Play::new(body)),
+            ..self
+        }
+    }
+    pub fn build(self) -> TwilioResult<String> {
+        // Create a buffer and serialize our nodes into it
+        let mut writer = Vec::with_capacity(128);
+        to_writer(&mut writer, &self)?;
+
+        // We then check that the serialized string is the same as what we expect
+        let string = String::from_utf8(writer)?;
+        Ok(string)
+    }
+}
+use serde::ser::Serialize;
+use std::io::Write;
+
+pub fn to_writer<W: Write, S: Serialize>(writer: W, value: &S) -> TwilioResult<()> {
+    let mut ser = Serializer::new(writer);
+    value.serialize(&mut ser)
+}
+
+impl<'a> Say<'a> {
+    pub fn new(body: &'a str) -> Self {
+        Say {
+            body,
+            voice: Voice::man,
+            // count: 1,
+            // language: "en",
+        }
+    }
+}
+
+impl<'a> Play<'a> {
+    pub fn new(body: &'a str) -> Self {
+        Play { body }
+        //count: 1 }
     }
 }
