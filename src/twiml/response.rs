@@ -1,7 +1,7 @@
-use serde;
-use serde_xml_rs::serialize;
-use serde_xml_rs::Serializer;
 use TwilioResult;
+use {
+    serde::{self, ser::Serialize}, serde_xml_rs::{serialize, Serializer}, std::io::Write,
+};
 
 #[derive(Debug, Serialize)]
 pub struct Response<'a> {
@@ -32,7 +32,7 @@ pub enum Voice {
 #[derive(Debug, Serialize)]
 pub struct Play<'a> {
     // #[serde(rename = "loop")]
-    // pub count: i32,
+    pub count: i32,
     #[serde(rename = "$value")]
     pub body: &'a str,
 }
@@ -66,12 +66,10 @@ impl<'a> Response<'a> {
         Ok(string)
     }
 }
-use serde::ser::Serialize;
-use std::io::Write;
 
 pub fn to_writer<W: Write, S: Serialize>(writer: W, value: &S) -> TwilioResult<()> {
     let mut ser = Serializer::new(writer);
-    value.serialize(&mut ser)
+    Ok(value.serialize(&mut ser)?)
 }
 
 impl<'a> Say<'a> {
@@ -87,7 +85,6 @@ impl<'a> Say<'a> {
 
 impl<'a> Play<'a> {
     pub fn new(body: &'a str) -> Self {
-        Play { body }
-        //count: 1 }
+        Play { body, count: 1 }
     }
 }
