@@ -6,15 +6,16 @@ use {encode_pairs, url_encode, Execute, Twilio, TwilioErr, TwilioRequest, Twilio
 pub struct Msg<'a> {
     from: &'a str,
     to: &'a str,
-    body: Option<&'a str>,
+    body: &'a str,
     media_url: Option<&'a str>,
 }
 
 impl<'a> Msg<'a> {
-    pub fn new(from: &'a str, to: &'a str) -> Msg<'a> {
+    pub fn new(from: &'a str, to: &'a str, body: &'a str) -> Msg<'a> {
         Msg {
             from,
             to,
+            body,
             ..Msg::default()
         }
     }
@@ -22,21 +23,17 @@ impl<'a> Msg<'a> {
 
 impl<'a> ToString for Msg<'a> {
     fn to_string(&self) -> String {
-        let mut pairs = vec![("To", self.to), ("From", self.from)];
-        pair!(self, media_url, "MediaUrl", pairs);
-        pair!(self, body, "Body", pairs);
-        encode_pairs(pairs).unwrap()
-        // match self.media_url {
-        //     Some(m_url) => encode_pairs(&[
-        //         ("To", self.to),
-        //         ("From", self.from),
-        //         ("Body", self.body),
-        //         ("MediaUrl", m_url),
-        //     ]).unwrap(),
-        //     None => {
-        //         encode_pairs(&[("To", self.to), ("From", self.from), ("Body", self.body)]).unwrap()
-        //     }
-        // }
+        match self.media_url {
+            Some(m_url) => encode_pairs(&[
+                ("To", self.to),
+                ("From", self.from),
+                ("Body", self.body),
+                ("MediaUrl", m_url),
+            ]).unwrap(),
+            None => {
+                encode_pairs(&[("To", self.to), ("From", self.from), ("Body", self.body)]).unwrap()
+            }
+        }
     }
 }
 
@@ -55,17 +52,18 @@ pub enum MsgStatus {
 
 #[derive(Debug, Deserialize)]
 pub struct MsgResp {
-    from: String,
-    to: String,
-    body: Option<String>,
-    sid: String,
-    status: Option<MsgStatus>,
-    media_url: String,
-    price: String,
-    uri: String,
-    date_created: String,
-    date_sent: String,
-    date_updated: String,
+    pub from: String,
+    pub to: String,
+    pub body: String,
+    pub sid: String,
+    pub status: MsgStatus,
+    pub media_url: Option<String>,
+    pub price: Option<String>,
+    pub price_unit: String,
+    pub uri: String,
+    pub date_created: String,
+    pub date_sent: Option<String>,
+    pub date_updated: String,
 }
 
 // for outbound sms
@@ -76,12 +74,14 @@ pub struct SendMsg<'a> {
 }
 
 impl<'a> SendMsg<'a> {
-    pub fn media(&mut self, media_url: &'a str) {
-        self.msg.media_url = Some(media_url);
-    }
-
-    pub fn body(&mut self, body: &'a str) {
-        self.msg.body = Some(body);
+    pub fn media(self, media_url: &'a str) -> SendMsg<'a> {
+        SendMsg {
+            msg: Msg {
+                media_url: Some(media_url),
+                ..self.msg
+            },
+            ..self
+        }
     }
 }
 
@@ -106,15 +106,19 @@ execute!(GetMessage);
 impl<'a> TwilioRequest for GetMessage<'a> {
     type Resp = MsgResp;
     fn send(self) -> TwilioResp<Self::Resp> {
-        let msg_sid = format!("{}.json", self.message_sid);
+        let msg_sid = format!("Messages/{}.json", self.message_sid);
         self.execute(Method::Get, msg_sid, None)
     }
 }
 
 impl<'a> GetMessage<'a> {
     pub fn redact(self) -> TwilioResp<MsgResp> {
-        let msg_sid = format!("{}.json", self.message_sid);
+        let msg_sid = format!("Messages/{}.json", self.message_sid);
         self.execute(Method::Post, msg_sid, Some("Body=".into()))
+    }
+    pub fn delete(self) -> TwilioResp<MsgResp> {
+        let msg_sid = format!("Messages/{}.json", self.message_sid);
+        self.execute(Method::Delete, msg_sid, None)
     }
     pub fn media(self) -> TwilioResp<MediaResp> {
         let msg_sid = format!("Messages/{}/Media.json", self.message_sid);
@@ -124,26 +128,26 @@ impl<'a> GetMessage<'a> {
 
 #[derive(Debug, Deserialize)]
 pub struct MediaResp {
-    media_list: Vec<MediaItem>,
-    num_pages: i32,
-    page: i32,
-    page_size: i32,
-    start: i32,
-    total: i32,
-    uri: String,
-    account_sid: String,
-    message_sid: String,
+    pub media_list: Vec<MediaItem>,
+    pub num_pages: i32,
+    pub page: i32,
+    pub page_size: i32,
+    pub start: i32,
+    pub total: i32,
+    pub uri: String,
+    pub account_sid: String,
+    pub message_sid: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct MediaItem {
-    account_sid: String,
-    content_type: String,
-    sid: String,
-    uri: String,
-    message_sid: String,
-    date_created: String,
-    date_update: String,
+    pub account_sid: String,
+    pub content_type: String,
+    pub sid: String,
+    pub uri: String,
+    pub message_sid: String,
+    pub date_created: String,
+    pub date_update: String,
 }
 
 pub struct Messages<'a> {
@@ -208,10 +212,10 @@ impl<'a> TwilioRequest for MessagesDetails<'a> {
 
 #[derive(Debug, Deserialize)]
 pub struct ListAllMsgs {
-    msgs: Vec<MsgResp>,
-    num_pages: usize,
-    page: usize,
-    page_size: usize,
-    total: usize,
-    uri: String,
+    pub messages: Vec<MsgResp>,
+    pub page: usize,
+    pub page_size: usize,
+    pub uri: String,
+    pub next_page_uri: Option<String>,
+    pub previous_page_uri: Option<String>,
 }

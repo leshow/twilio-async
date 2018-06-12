@@ -23,8 +23,14 @@ pub struct GetConference<'a> {
 }
 
 impl<'a> GetConference<'a> {
-    pub fn end(&'a mut self) {
-        self.conference.status = Some(COMPLETED);
+    pub fn end(self) -> GetConference<'a> {
+        GetConference {
+            conference: Conference {
+                status: Some(COMPLETED),
+                ..self.conference
+            },
+            ..self
+        }
     }
 }
 
@@ -61,22 +67,22 @@ impl<'a> TwilioRequest for Conferences<'a> {
 
 #[derive(Deserialize, Debug)]
 pub struct ListConferencesResp {
-    conferences: Vec<ConferenceResp>,
-    end: usize,
-    account_sid: String,
-    start: usize,
-    page: usize,
-    page_size: usize,
+    pub conferences: Vec<ConferenceResp>,
+    pub end: usize,
+    pub account_sid: String,
+    pub start: usize,
+    pub page: usize,
+    pub page_size: usize,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct ConferenceResp {
-    account_sid: String,
-    date_created: String,
-    date_update: String,
-    friendly_name: String,
-    region: String,
-    sid: String,
-    status: String,
-    uri: String,
+    pub account_sid: String,
+    pub date_created: String,
+    pub date_update: String,
+    pub friendly_name: String,
+    pub region: String,
+    pub sid: String,
+    pub status: String,
+    pub uri: String,
 }

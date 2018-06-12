@@ -17,19 +17,22 @@ macro_rules! execute {
                 use {
                     futures::{future, Future, Stream}, hyper::{header, Request}, serde_json,
                 };
-                const BASE: &str = "https://api.twilio.com/2010-04-01/Accounts/";
+                const BASE: &str = "https://api.twilio.com/2010-04-01/Accounts";
 
                 let mut core_ref = self.client.core.try_borrow_mut()?;
                 let url =
                     format!("{}/{}/{}", BASE, self.client.sid, url.as_ref()).parse::<hyper::Uri>()?;
+                println!("{:?}", url);
                 let mut request = Request::new(method, url);
 
                 if let Some(body) = body {
+                    println!("{:?}", body);
                     request.set_body(body);
                     request
                         .headers_mut()
                         .set(header::ContentType::form_url_encoded());
                 }
+                println!("{:?}", request);
 
                 request.headers_mut().set(self.client.auth.clone());
                 let fut_req = self.client.client.request(request).and_then(|res| {

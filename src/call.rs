@@ -87,21 +87,21 @@ pub enum CallStatus {
 
 #[derive(Deserialize, Debug)]
 pub struct CallResp {
-    from: String,
-    to: String,
-    sid: String,
-    start_time: String,
-    status: CallStatus,
-    account_sid: String,
-    caller_name: Option<String>,
-    duration: String,
-    price: String,
-    price_unit: String,
-    uri: String,
-    url: String,
-    date_created: String,
-    end_time: String,
-    phone_number_sid: String,
+    pub from: String,
+    pub to: String,
+    pub sid: String,
+    pub start_time: String,
+    pub status: CallStatus,
+    pub account_sid: String,
+    pub caller_name: Option<String>,
+    pub duration: String,
+    pub price: String,
+    pub price_unit: String,
+    pub uri: String,
+    pub url: String,
+    pub date_created: String,
+    pub end_time: String,
+    pub phone_number_sid: String,
 }
 
 pub struct SendCall<'a> {
@@ -120,31 +120,85 @@ impl<'a> TwilioRequest for SendCall<'a> {
 }
 
 impl<'a> SendCall<'a> {
-    pub fn url(&'a mut self, url: &'a str) {
-        self.call.url = Some(url);
+    pub fn url(self, url: &'a str) -> SendCall<'a> {
+        SendCall {
+            call: Call {
+                url: Some(url),
+                ..self.call
+            },
+            ..self
+        }
     }
-    pub fn sid(&'a mut self, sid: &'a str) {
-        self.call.sid = Some(sid);
+    pub fn sid(self, sid: &'a str) -> SendCall<'a> {
+        SendCall {
+            call: Call {
+                sid: Some(sid),
+                ..self.call
+            },
+            ..self
+        }
     }
-    pub fn callerid(&'a mut self, callerid: &'a str) {
-        self.call.callerid = Some(callerid);
+    pub fn callerid(self, callerid: &'a str) -> SendCall<'a> {
+        SendCall {
+            call: Call {
+                callerid: Some(callerid),
+                ..self.call
+            },
+            ..self
+        }
     }
-    pub fn machine_detection(&mut self, machine_detection: bool) {
-        self.call.machine_detection = Some(machine_detection);
+    pub fn machine_detection(self, machine_detection: bool) -> SendCall<'a> {
+        SendCall {
+            call: Call {
+                machine_detection: Some(machine_detection),
+                ..self.call
+            },
+            ..self
+        }
     }
-    pub fn record(&mut self, record: bool) {
-        self.call.record = Some(record);
+    pub fn record(self, record: bool) -> SendCall<'a> {
+        SendCall {
+            call: Call {
+                record: Some(record),
+                ..self.call
+            },
+            ..self
+        }
     }
-    pub fn send_digits(&'a mut self, send_digits: &'a str) {
-        self.call.send_digits = Some(send_digits);
+    pub fn send_digits(self, send_digits: &'a str) -> SendCall<'a> {
+        SendCall {
+            call: Call {
+                send_digits: Some(send_digits),
+                ..self.call
+            },
+            ..self
+        }
     }
-    pub fn status_callback(&'a mut self, callback: &'a str) {
-        self.call.status_callback = Some(callback);
+    pub fn status_callback(self, callback: &'a str) -> SendCall<'a> {
+        SendCall {
+            call: Call {
+                status_callback: Some(callback),
+                ..self.call
+            },
+            ..self
+        }
     }
-    pub fn callback_event(&mut self, event: CallbackEvent) {
-        self.call.callback_event = Some(event);
+    pub fn callback_event(self, event: CallbackEvent) -> SendCall<'a> {
+        SendCall {
+            call: Call {
+                callback_event: Some(event),
+                ..self.call
+            },
+            ..self
+        }
     }
-    pub fn timeout(&'a mut self, timeout: &'a str) {
-        self.call.timeout = Some(timeout);
+    pub fn timeout(self, timeout: &'a str) -> SendCall<'a> {
+        SendCall {
+            call: Call {
+                timeout: Some(timeout),
+                ..self.call
+            },
+            ..self
+        }
     }
 }

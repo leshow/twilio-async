@@ -70,38 +70,38 @@ impl<'a> Recordings<'a> {
 
 #[derive(Deserialize, Debug)]
 pub struct ListRecordingResp {
-    recordings: Vec<RecordingResp>,
-    end: usize,
-    account_sid: String,
-    start: usize,
-    page: usize,
-    page_size: usize,
+    pub recordings: Vec<RecordingResp>,
+    pub end: usize,
+    pub account_sid: String,
+    pub start: usize,
+    pub page: usize,
+    pub page_size: usize,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct RecordingResp {
-    account_sid: String,
-    call_sid: String,
-    channels: String,
-    conference_sid: String,
-    date_created: String,
-    date_updated: String,
-    end_time: String,
-    start_time: String,
-    price: String,
-    price_unit: String,
-    duration: String,
-    encryption_details: EncryptionDetails,
-    error_code: String,
-    uri: String,
-    status: RecordingStatus,
+    pub account_sid: String,
+    pub call_sid: String,
+    pub channels: String,
+    pub conference_sid: String,
+    pub date_created: String,
+    pub date_updated: String,
+    pub end_time: String,
+    pub start_time: String,
+    pub price: String,
+    pub price_unit: String,
+    pub duration: String,
+    pub encryption_details: EncryptionDetails,
+    pub error_code: String,
+    pub uri: String,
+    pub status: RecordingStatus,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct EncryptionDetails {
-    encryption_public_key_sid: String,
-    encryption_cek: String,
-    encryption_iv: String,
+    pub encryption_public_key_sid: String,
+    pub encryption_cek: String,
+    pub encryption_iv: String,
 }
 
 #[derive(Deserialize, Debug)]

@@ -19,10 +19,10 @@ mod recording;
 pub mod twiml;
 
 use self::TwilioErr::*;
-use call::*;
-use conference::*;
-use message::*;
-use recording::*;
+pub use call::*;
+pub use conference::*;
+pub use message::*;
+pub use recording::*;
 
 pub use {
     futures::{future, Future, Stream},
@@ -69,9 +69,9 @@ impl Twilio {
         })
     }
 
-    pub fn send_msg<'a>(&'a self, from: &'a str, to: &'a str) -> SendMsg<'a> {
+    pub fn send_msg<'a>(&'a self, from: &'a str, to: &'a str, body: &'a str) -> SendMsg<'a> {
         SendMsg {
-            msg: Msg::new(from, to),
+            msg: Msg::new(from, to, body),
             client: &self,
         }
     }
@@ -118,12 +118,7 @@ impl Twilio {
 }
 
 pub trait Execute {
-    fn execute<U, D>(
-        self,
-        method: Method,
-        url: U,
-        body: Option<String>,
-    ) -> Result<(hyper::Headers, hyper::StatusCode, Option<D>), TwilioErr>
+    fn execute<U, D>(self, method: Method, url: U, body: Option<String>) -> TwilioResp<D>
     where
         U: AsRef<str>,
         D: for<'de> serde::Deserialize<'de>;
@@ -131,7 +126,7 @@ pub trait Execute {
 
 pub trait TwilioRequest: Execute {
     type Resp: for<'de> serde::Deserialize<'de>;
-    fn send(self) -> Result<(hyper::Headers, hyper::StatusCode, Option<Self::Resp>), TwilioErr>;
+    fn send(self) -> TwilioResp<Self::Resp>;
 }
 
 pub fn encode_pairs<I, K, V>(pairs: I) -> Option<String>
