@@ -1,6 +1,6 @@
 use hyper::{self, Method};
 use serde;
-use {encode_pairs, Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
+use {Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
 
 #[derive(Debug, Default)]
 pub struct Recording<'a> {
