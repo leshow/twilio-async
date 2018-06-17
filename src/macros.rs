@@ -12,7 +12,8 @@ macro_rules! execute {
                 D: for<'de> serde::Deserialize<'de>,
             {
                 use {
-                    futures::{future, Future, Stream}, hyper::{header, Request}, serde_json,
+                    error::TwilioErrorResp, futures::{future, Future, Stream},
+                    hyper::{header, Request, StatusCode}, serde_json,
                 };
                 const BASE: &str = "https://api.twilio.com/2010-04-01/Accounts";
 
@@ -48,7 +49,17 @@ macro_rules! execute {
                             if chunks.is_empty() {
                                 Ok((header, status, None))
                             } else {
+                                // match status {
+                                // StatusCode::BadRequest => Ok((
+                                // header,
+                                // status,
+                                // Some(serde_json::from_slice::<TwilioErrorResp>(&chunks)?),
+                                // )),
+                                // _ => {
+                                println!("{:?}", String::from_utf8(chunks.clone()));
                                 Ok((header, status, Some(serde_json::from_slice(&chunks)?)))
+                                // }
+                                // }
                             }
                         })
                 });

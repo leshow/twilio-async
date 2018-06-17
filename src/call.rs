@@ -6,7 +6,7 @@ use {encode_pairs, Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
 pub struct Call<'a> {
     from: &'a str,
     to: &'a str,
-    url: Option<&'a str>,
+    url: &'a str,
     sid: Option<&'a str>,
     callerid: Option<&'a str>,
     machine_detection: Option<bool>,
@@ -28,10 +28,11 @@ pub enum CallbackEvent {
 use self::CallbackEvent::*;
 
 impl<'a> Call<'a> {
-    pub fn new(from: &'a str, to: &'a str) -> Call<'a> {
+    pub fn new(from: &'a str, to: &'a str, url: &'a str) -> Call<'a> {
         Call {
             from,
             to,
+            url,
             ..Call::default()
         }
     }
@@ -39,8 +40,7 @@ impl<'a> Call<'a> {
 
 impl<'a> ToString for Call<'a> {
     fn to_string(&self) -> String {
-        let mut pairs = vec![("To", self.to), ("From", self.from)];
-        pair!(self, url, "Url", pairs);
+        let mut pairs = vec![("To", self.to), ("From", self.from), ("Url", self.url)];
         pair!(self, sid, "ApplicationSid", pairs);
         pair!(self, callerid, "CallerId", pairs);
         if let Some(detection) = self.machine_detection {
@@ -90,18 +90,32 @@ pub struct CallResp {
     pub from: String,
     pub to: String,
     pub sid: String,
-    pub start_time: String,
+    pub start_time: Option<String>,
     pub status: CallStatus,
     pub account_sid: String,
     pub caller_name: Option<String>,
-    pub duration: String,
-    pub price: String,
+    pub duration: Option<i32>,
+    pub price: Option<String>,
     pub price_unit: String,
     pub uri: String,
-    pub url: String,
-    pub date_created: String,
-    pub end_time: String,
+    pub date_created: Option<String>,
+    pub end_time: Option<String>,
     pub phone_number_sid: String,
+    pub direction: Direction,
+}
+
+#[derive(Debug, Deserialize)]
+#[allow(non_camel_case_types)]
+pub enum Direction {
+    inbound,
+    #[serde(rename = "outbound-api")]
+    outbound_api,
+    #[serde(rename = "outbound-dial")]
+    outbound_dial,
+    #[serde(rename = "trunking-terminating")]
+    trunking_terminating,
+    #[serde(rename = "trunking-originating")]
+    trunking_originating,
 }
 
 pub struct SendCall<'a> {
@@ -120,15 +134,6 @@ impl<'a> TwilioRequest for SendCall<'a> {
 }
 
 impl<'a> SendCall<'a> {
-    pub fn url(self, url: &'a str) -> SendCall<'a> {
-        SendCall {
-            call: Call {
-                url: Some(url),
-                ..self.call
-            },
-            ..self
-        }
-    }
     pub fn sid(self, sid: &'a str) -> SendCall<'a> {
         SendCall {
             call: Call {

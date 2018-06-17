@@ -88,9 +88,9 @@ impl Twilio {
         Messages { client: &self }
     }
 
-    pub fn call<'a>(&'a self, from: &'a str, to: &'a str) -> SendCall<'a> {
+    pub fn call<'a>(&'a self, from: &'a str, to: &'a str, url: &'a str) -> SendCall<'a> {
         SendCall {
-            call: Call::new(from, to),
+            call: Call::new(from, to, url),
             client: &self,
         }
     }

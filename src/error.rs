@@ -59,3 +59,9 @@ from!(hyper_tls::Error, TlsErr);
 from!(io::Error, Io);
 from!(serde_xml_rs::Error, SerdeXml);
 from!(string::FromUtf8Error, Utf8Err);
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct TwilioErrorResp {
+    pub code: i32,
+    pub message: String,
+}
