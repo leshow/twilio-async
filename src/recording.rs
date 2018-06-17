@@ -23,7 +23,7 @@ execute!(GetRecording);
 
 impl<'a> TwilioRequest for GetRecording<'a> {
     type Resp = RecordingResp;
-    fn send(self) -> TwilioResp<Self::Resp> {
+    fn run(self) -> TwilioResp<Self::Resp> {
         let url = format!("Recordings/{}.json", self.recording.sid);
         self.execute(Method::Get, url, None)
     }
@@ -45,7 +45,7 @@ execute!(Recordings);
 
 impl<'a> TwilioRequest for Recordings<'a> {
     type Resp = ListRecordingResp;
-    fn send(self) -> TwilioResp<Self::Resp> {
+    fn run(self) -> TwilioResp<Self::Resp> {
         self.execute(Method::Get, "Recordings.json", None)
     }
 }

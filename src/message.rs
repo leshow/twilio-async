@@ -89,7 +89,7 @@ execute!(SendMsg);
 
 impl<'a> TwilioRequest for SendMsg<'a> {
     type Resp = MsgResp;
-    fn send(self) -> TwilioResp<Self::Resp> {
+    fn run(self) -> TwilioResp<Self::Resp> {
         let msg = self.msg.to_string();
         self.execute(Method::Post, "Messages.json", Some(msg))
     }
@@ -105,7 +105,7 @@ execute!(GetMessage);
 
 impl<'a> TwilioRequest for GetMessage<'a> {
     type Resp = MsgResp;
-    fn send(self) -> TwilioResp<Self::Resp> {
+    fn run(self) -> TwilioResp<Self::Resp> {
         let msg_sid = format!("Messages/{}.json", self.message_sid);
         self.execute(Method::Get, msg_sid, None)
     }
@@ -177,7 +177,7 @@ execute!(Messages);
 
 impl<'a> TwilioRequest for Messages<'a> {
     type Resp = ListAllMsgs;
-    fn send(self) -> TwilioResp<Self::Resp> {
+    fn run(self) -> TwilioResp<Self::Resp> {
         self.execute(Method::Get, "Messages.json", None)
     }
 }
@@ -204,7 +204,7 @@ execute!(MessagesDetails);
 
 impl<'a> TwilioRequest for MessagesDetails<'a> {
     type Resp = ListAllMsgs;
-    fn send(self) -> TwilioResp<Self::Resp> {
+    fn run(self) -> TwilioResp<Self::Resp> {
         let url = format!("Messages.json?{}", self.to_string());
         self.execute(Method::Get, url, None)
     }

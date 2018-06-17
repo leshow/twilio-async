@@ -127,7 +127,7 @@ execute!(SendCall);
 
 impl<'a> TwilioRequest for SendCall<'a> {
     type Resp = CallResp;
-    fn send(self) -> TwilioResp<Self::Resp> {
+    fn run(self) -> TwilioResp<Self::Resp> {
         let call = self.call.to_string();
         self.execute(Method::Post, "Calls.json", Some(call))
     }

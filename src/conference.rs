@@ -38,7 +38,7 @@ execute!(GetConference);
 
 impl<'a> TwilioRequest for GetConference<'a> {
     type Resp = ConferenceResp;
-    fn send(self) -> TwilioResp<Self::Resp> {
+    fn run(self) -> TwilioResp<Self::Resp> {
         let url = format!("Conferences/{}.json", self.conference.sid);
         match self.conference.status {
             Some(status) => self.execute(
@@ -60,7 +60,7 @@ execute!(Conferences);
 
 impl<'a> TwilioRequest for Conferences<'a> {
     type Resp = ListConferencesResp;
-    fn send(self) -> TwilioResp<Self::Resp> {
+    fn run(self) -> TwilioResp<Self::Resp> {
         self.execute(Method::Get, "Conferences.json", None)
     }
 }

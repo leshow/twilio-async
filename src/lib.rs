@@ -127,7 +127,7 @@ pub trait Execute {
 
 pub trait TwilioRequest: Execute {
     type Resp: for<'de> serde::Deserialize<'de>;
-    fn send(self) -> TwilioResp<Self::Resp>;
+    fn run(self) -> TwilioResp<Self::Resp>;
 }
 
 pub fn encode_pairs<I, K, V>(pairs: I) -> Option<String>
