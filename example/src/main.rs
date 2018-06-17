@@ -12,13 +12,14 @@ fn main() -> Result<(), Box<Error>> {
 
 fn try_msg() -> Result<(), Box<Error>> {
     let twilio = Twilio::new(env::var("TWILIO_SID")?, env::var("TWILIO_TOKEN")?)?;
+    let num = env::var("OUTBOUND_NUM")?;
     // sending a message
-    let (_, _, resp) = twilio.send_msg("+xxxxxx", "+xxxxxx", "Hello World").send()?;
+    let (_, _, resp) = twilio.send_msg("18193074013", &num, "Hello World").send()?;
 
     println!("{:?}", resp);
     // sending with media
     let (_, _, resp) = twilio
-        .send_msg("+xxxxx3", "+161xxxxxx5", "foo")
+        .send_msg("18193074013", &num, "foo")
         .media("http://i0.kym-cdn.com/photos/images/newsfeed/000/377/946/0b9.jpg")
         .send()?;
     // get individual msg
