@@ -41,3 +41,7 @@ Calls:
         .call("from", "to", "http://demo.twilio.com/docs/voice.xml")
         .send()?;
 ```
+
+## Beta
+
+This library is a work in progress, messages and calls should work, there is untested code for conferences/recordings also, and I'm working on support twiml.
