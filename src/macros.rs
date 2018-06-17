@@ -12,8 +12,7 @@ macro_rules! execute {
                 D: for<'de> serde::Deserialize<'de>,
             {
                 use {
-                    error::TwilioErrorResp, futures::{future, Future, Stream},
-                    hyper::{header, Request, StatusCode}, serde_json,
+                    futures::{future, Future, Stream}, hyper::{header, Request}, serde_json,
                 };
                 const BASE: &str = "https://api.twilio.com/2010-04-01/Accounts";
 

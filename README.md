@@ -44,4 +44,4 @@ Calls:
 
 ## Beta
 
-This library is a work in progress, messages and calls should work, there is untested code for conferences/recordings also, and I'm working on support twiml.
+This library is a work in progress, messages and calls should work, there is untested code for conferences/recordings also, and I'm working on support twiml (it's largely unfinished at the moment).

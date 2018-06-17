@@ -1,7 +1,5 @@
 use TwilioResult;
-use {
-    serde::{self, ser::Serialize}, serde_xml_rs::{serialize, Serializer}, std::io::Write,
-};
+use {serde::ser::Serialize, serde_xml_rs::Serializer, std::io::Write};
 
 #[derive(Debug, Serialize)]
 pub struct Response<'a> {
