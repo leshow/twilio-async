@@ -49,17 +49,8 @@ macro_rules! execute {
                             if chunks.is_empty() {
                                 Ok((header, status, None))
                             } else {
-                                // match status {
-                                // StatusCode::BadRequest => Ok((
-                                // header,
-                                // status,
-                                // Some(serde_json::from_slice::<TwilioErrorResp>(&chunks)?),
-                                // )),
-                                // _ => {
-                                println!("{:?}", String::from_utf8(chunks.clone()));
+                                // println!("{:?}", String::from_utf8(chunks.clone()));
                                 Ok((header, status, Some(serde_json::from_slice(&chunks)?)))
-                                // }
-                                // }
                             }
                         })
                 });
