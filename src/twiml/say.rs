@@ -5,10 +5,10 @@ use xml::{
 
 #[derive(Debug)]
 pub struct Say<'a> {
-    pub voice: Voice,
-    pub count: usize,
-    pub language: &'a str,
-    pub body: &'a str,
+    voice: Voice,
+    count: usize,
+    language: &'a str,
+    body: &'a str,
 }
 
 #[derive(Debug)]

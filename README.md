@@ -44,6 +44,6 @@ let (headers, status, resp) = twilio
 
 ## Beta software
 
-This library is a work in progress, messages and calls should work, there is untested code for conferences/recordings also, and I'm working on support twiml (it's largely unfinished at the moment).
+This library is a work in progress, messages and calls should work, there is untested code for conferences/recordings also, and I'm working on support twiml (Response/Say/Play is supported for now).
 
 PRs and suggestions are welcome.

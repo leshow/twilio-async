@@ -5,8 +5,8 @@ use xml::{
 
 #[derive(Debug)]
 pub struct Play<'a> {
-    pub count: usize,
-    pub body: &'a str,
+    count: usize,
+    body: &'a str,
 }
 
 impl<'a> Play<'a> {

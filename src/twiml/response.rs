@@ -3,8 +3,8 @@ use xml::{writer::XmlEvent, EmitterConfig};
 
 #[derive(Debug)]
 pub struct Response<'a> {
-    pub say: Option<Say<'a>>,
-    pub play: Option<Play<'a>>,
+    say: Option<Say<'a>>,
+    play: Option<Play<'a>>,
 }
 
 impl<'a> Response<'a> {
