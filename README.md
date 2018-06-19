@@ -42,6 +42,17 @@ let (headers, status, resp) = twilio
     .run()?;
 ```
 
+Twiml:
+
+```rust
+let resp = Response::new()
+    .say(Say::new("Hello World"))
+    .play(Play::new("https://api.twilio.com/Cowbell.mp3"))
+    .build();
+let s = "<Response><Say voice=\"man\" language=\"en\" loop=\"1\">Hello World</Say><Play loop=\"1\">https://api.twilio.com/Cowbell.mp3</Play></Response>";
+assert_eq!(resp.unwrap(), s.to_string());
+```
+
 ## Beta software
 
 This library is a work in progress, messages and calls should work, there is untested code for conferences/recordings also, and I'm working on support twiml (Response/Say/Play is supported for now).
