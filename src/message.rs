@@ -74,14 +74,9 @@ pub struct SendMsg<'a> {
 }
 
 impl<'a> SendMsg<'a> {
-    pub fn media(self, media_url: &'a str) -> SendMsg<'a> {
-        SendMsg {
-            msg: Msg {
-                media_url: Some(media_url),
-                ..self.msg
-            },
-            ..self
-        }
+    pub fn media(mut self, media_url: &'a str) -> SendMsg<'a> {
+        self.msg.media_url = Some(media_url);
+        self
     }
 }
 

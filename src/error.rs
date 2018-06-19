@@ -1,8 +1,8 @@
 use hyper;
 use hyper_tls;
 use serde_json;
-use serde_xml_rs;
 use std::{cell, error::Error, fmt, io, string};
+use xml::writer;
 
 // Errors
 #[derive(Debug)]
@@ -13,8 +13,8 @@ pub enum TwilioErr {
     NetworkErr(hyper::Error),
     SerdeErr(serde_json::Error),
     BorrowErr(cell::BorrowMutError),
-    SerdeXml(serde_xml_rs::Error),
     Utf8Err(string::FromUtf8Error),
+    EmitterErr(writer::Error),
 }
 
 pub use TwilioErr::*;
@@ -30,8 +30,8 @@ impl Error for TwilioErr {
             SerdeErr(ref e) => e.description(),
             NetworkErr(ref e) => e.description(),
             BorrowErr(ref e) => e.description(),
-            SerdeXml(ref e) => e.description(),
             Utf8Err(ref e) => e.description(),
+            EmitterErr(ref e) => e.description(),
         }
     }
 }
@@ -45,8 +45,8 @@ impl fmt::Display for TwilioErr {
             SerdeErr(ref e) => write!(f, "Serde JSON Error: {}", e),
             NetworkErr(ref e) => write!(f, "There was a network error. {}", e),
             BorrowErr(ref e) => write!(f, "Error trying to get client reference. {}", e),
-            SerdeXml(ref e) => write!(f, "Error serializing XML: {}", e),
             Utf8Err(ref e) => write!(f, "Error converting to utf-8 string: {}", e),
+            EmitterErr(ref e) => write!(f, "Error emitting xml: {}", e),
         }
     }
 }
@@ -57,11 +57,5 @@ from!(serde_json::Error, SerdeErr);
 from!(hyper::error::UriError, UrlParse);
 from!(hyper_tls::Error, TlsErr);
 from!(io::Error, Io);
-from!(serde_xml_rs::Error, SerdeXml);
 from!(string::FromUtf8Error, Utf8Err);
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct TwilioErrorResp {
-    pub code: i32,
-    pub message: String,
-}
+from!(writer::Error, EmitterErr);

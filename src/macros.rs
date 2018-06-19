@@ -19,22 +19,22 @@ macro_rules! execute {
                 let mut core_ref = self.client.core.try_borrow_mut()?;
                 let url =
                     format!("{}/{}/{}", BASE, self.client.sid, url.as_ref()).parse::<hyper::Uri>()?;
-                println!("{:?}", url);
+                // println!("{:?}", url);
                 let mut request = Request::new(method, url);
 
                 if let Some(body) = body {
-                    println!("{:?}", body);
+                    // println!("{:?}", body);
                     request.set_body(body);
                     request
                         .headers_mut()
                         .set(header::ContentType::form_url_encoded());
                 }
-                println!("{:?}", request);
+                // println!("{:?}", request);
 
                 request.headers_mut().set(self.client.auth.clone());
                 let fut_req = self.client.client.request(request).and_then(|res| {
-                    println!("Response: {}", res.status());
-                    println!("Headers: \n{}", res.headers());
+                    // println!("Response: {}", res.status());
+                    // println!("Headers: \n{}", res.headers());
 
                     let header = res.headers().clone();
                     let status = res.status();

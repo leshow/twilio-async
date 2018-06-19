@@ -23,14 +23,9 @@ pub struct GetConference<'a> {
 }
 
 impl<'a> GetConference<'a> {
-    pub fn end(self) -> GetConference<'a> {
-        GetConference {
-            conference: Conference {
-                status: Some(COMPLETED),
-                ..self.conference
-            },
-            ..self
-        }
+    pub fn end(mut self) -> GetConference<'a> {
+        self.conference.status = Some(COMPLETED);
+        self
     }
 }
 

@@ -1,6 +1,19 @@
-mod response;
+pub mod play;
+pub mod response;
+pub mod say;
 
-pub use twiml::response::*;
+use twiml::play::*;
+use twiml::response::*;
+use twiml::say::*;
+
+use std::io::Write;
+use xml::writer::EventWriter;
+use TwilioResult;
+
+pub trait Twiml {
+    fn write<W: Write>(&self, w: &mut EventWriter<W>) -> TwilioResult<()>;
+    fn build(&self) -> TwilioResult<String>;
+}
 
 #[cfg(test)]
 mod tests {
@@ -9,11 +22,11 @@ mod tests {
     #[test]
     fn twiml_response() {
         let resp = Response::new()
-            .say("Hello World")
-            .play("https://api.twilio.com/Cowbell.mp3")
+            .say(Say::new("Hello World"))
+            .play(Play::new("https://api.twilio.com/Cowbell.mp3"))
             .build();
-        println!("{:?}", resp);
-        let s = "<Response><Say>Hello World</Say><Play>https://api.twilio.com/Cowbell.mp3</Play></Response>";
+        let s = "<Response><Say voice=\"man\" language=\"en\" loop=\"1\">Hello World</Say><Play loop=\"1\">https://api.twilio.com/Cowbell.mp3</Play></Response>";
         assert_eq!(resp.unwrap(), s.to_string());
     }
+
 }

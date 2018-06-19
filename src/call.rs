@@ -134,76 +134,36 @@ impl<'a> TwilioRequest for SendCall<'a> {
 }
 
 impl<'a> SendCall<'a> {
-    pub fn sid(self, sid: &'a str) -> SendCall<'a> {
-        SendCall {
-            call: Call {
-                sid: Some(sid),
-                ..self.call
-            },
-            ..self
-        }
+    pub fn sid(mut self, sid: &'a str) -> SendCall<'a> {
+        self.call.sid = Some(sid);
+        self
     }
-    pub fn callerid(self, callerid: &'a str) -> SendCall<'a> {
-        SendCall {
-            call: Call {
-                callerid: Some(callerid),
-                ..self.call
-            },
-            ..self
-        }
+    pub fn callerid(mut self, callerid: &'a str) -> SendCall<'a> {
+        self.call.callerid = Some(callerid);
+        self
     }
-    pub fn machine_detection(self, machine_detection: bool) -> SendCall<'a> {
-        SendCall {
-            call: Call {
-                machine_detection: Some(machine_detection),
-                ..self.call
-            },
-            ..self
-        }
+    pub fn machine_detection(mut self, machine_detection: bool) -> SendCall<'a> {
+        self.call.machine_detection = Some(machine_detection);
+        self
     }
-    pub fn record(self, record: bool) -> SendCall<'a> {
-        SendCall {
-            call: Call {
-                record: Some(record),
-                ..self.call
-            },
-            ..self
-        }
+    pub fn record(mut self, record: bool) -> SendCall<'a> {
+        self.call.record = Some(record);
+        self
     }
-    pub fn send_digits(self, send_digits: &'a str) -> SendCall<'a> {
-        SendCall {
-            call: Call {
-                send_digits: Some(send_digits),
-                ..self.call
-            },
-            ..self
-        }
+    pub fn send_digits(mut self, send_digits: &'a str) -> SendCall<'a> {
+        self.call.send_digits = Some(send_digits);
+        self
     }
-    pub fn status_callback(self, callback: &'a str) -> SendCall<'a> {
-        SendCall {
-            call: Call {
-                status_callback: Some(callback),
-                ..self.call
-            },
-            ..self
-        }
+    pub fn status_callback(mut self, callback: &'a str) -> SendCall<'a> {
+        self.call.status_callback = Some(callback);
+        self
     }
-    pub fn callback_event(self, event: CallbackEvent) -> SendCall<'a> {
-        SendCall {
-            call: Call {
-                callback_event: Some(event),
-                ..self.call
-            },
-            ..self
-        }
+    pub fn callback_event(mut self, event: CallbackEvent) -> SendCall<'a> {
+        self.call.callback_event = Some(event);
+        self
     }
-    pub fn timeout(self, timeout: &'a str) -> SendCall<'a> {
-        SendCall {
-            call: Call {
-                timeout: Some(timeout),
-                ..self.call
-            },
-            ..self
-        }
+    pub fn timeout(mut self, timeout: &'a str) -> SendCall<'a> {
+        self.call.timeout = Some(timeout);
+        self
     }
 }

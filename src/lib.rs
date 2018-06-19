@@ -6,9 +6,9 @@ extern crate hyper;
 extern crate hyper_tls;
 extern crate serde;
 extern crate serde_json;
-extern crate serde_xml_rs;
 extern crate tokio_core;
 extern crate url;
+extern crate xml;
 
 #[macro_use]
 mod macros;
