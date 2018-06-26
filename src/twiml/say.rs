@@ -78,3 +78,12 @@ impl Voice {
         }
     }
 }
+
+impl<'a, T> From<T> for Say<'a>
+where
+    T: Into<&'a str>,
+{
+    fn from(s: T) -> Self {
+        Say::new(s.into())
+    }
+}

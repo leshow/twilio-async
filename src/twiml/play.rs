@@ -38,3 +38,12 @@ impl<'a> Twiml for Play<'a> {
         Ok(String::from_utf8(writer)?)
     }
 }
+
+impl<'a, T> From<T> for Play<'a>
+where
+    T: Into<&'a str>,
+{
+    fn from(s: T) -> Self {
+        Play::new(s.into())
+    }
+}

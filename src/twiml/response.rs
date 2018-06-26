@@ -14,15 +14,15 @@ impl<'a> Response<'a> {
             play: None,
         }
     }
-    pub fn say(self, say: Say<'a>) -> Response<'a> {
+    pub fn say<S: Into<Say<'a>>>(self, say: S) -> Response<'a> {
         Response {
-            say: Some(say),
+            say: Some(say.into()),
             ..self
         }
     }
-    pub fn play(self, play: Play<'a>) -> Response<'a> {
+    pub fn play<P: Into<Play<'a>>>(self, play: P) -> Response<'a> {
         Response {
-            play: Some(play),
+            play: Some(play.into()),
             ..self
         }
     }
