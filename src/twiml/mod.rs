@@ -28,6 +28,16 @@ mod tests {
         let s = "<Response><Say voice=\"man\" language=\"en\" loop=\"1\">Hello World</Say><Play loop=\"1\">https://api.twilio.com/Cowbell.mp3</Play></Response>";
         assert_eq!(resp.unwrap(), s.to_string());
     }
+
+    #[test]
+    fn twiml_resp_build() {
+        let resp = Response::new()
+            .say(Say::new("Hello World").lang("de").voice(Voice::alice))
+            .play("https://api.twilio.com/Cowbell.mp3")
+            .build();
+        let s = "<Response><Say voice=\"alice\" language=\"de\" loop=\"1\">Hello World</Say><Play loop=\"1\">https://api.twilio.com/Cowbell.mp3</Play></Response>";
+    }
+
     #[test]
     fn twiml_say() {
         let say = Say::new("Hello World")
@@ -37,6 +47,7 @@ mod tests {
         let s = "<Say voice=\"alice\" language=\"de\" loop=\"1\">Hello World</Say>";
         assert_eq!(say.unwrap(), s.to_string());
     }
+
     #[test]
     fn twiml_play() {
         let play = Play::new("https://api.twilio.com/Cowbell.mp3")
