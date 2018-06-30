@@ -4,25 +4,27 @@ use xml::{
 };
 
 #[derive(Debug)]
-pub struct Play<'a> {
-    count: usize,
+pub struct Msg<'a> {
+    media: Option<&'a str>,
     body: &'a str,
 }
 
-impl<'a> Play<'a> {
+impl<'a> Msg<'a> {
     pub fn new(body: &'a str) -> Self {
-        Play { body, count: 1 }
+        Msg { body, media: None }
     }
-    pub fn count(mut self, count: usize) -> Play<'a> {
-        self.count = count;
+    pub fn media(mut self, media: &'a str) -> Self {
+        self.media = Some(media);
         self
     }
 }
 
-impl<'a> Twiml for Play<'a> {
+impl<'a> Twiml for Msg<'a> {
     fn write<W: Write>(&self, w: &mut EventWriter<W>) -> TwilioResult<()> {
-        w.write(XmlEvent::start_element("Play").attr("loop", &self.count.to_string()))?;
+        w.write(XmlEvent::start_element("Message"))?; // .attr("loop", &self.count.to_string())
+        w.write(XmlEvent::start_element("Body"))?;
         w.write(self.body)?;
+        w.write(XmlEvent::end_element())?;
         w.write(XmlEvent::end_element())?;
         Ok(())
     }
@@ -40,11 +42,11 @@ impl<'a> Twiml for Play<'a> {
     }
 }
 
-impl<'a, T> From<T> for Play<'a>
+impl<'a, T> From<T> for Msg<'a>
 where
     T: Into<&'a str>,
 {
     fn from(s: T) -> Self {
-        Play::new(s.into())
+        Msg::new(s.into())
     }
 }

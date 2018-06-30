@@ -1,9 +1,17 @@
+pub mod dial;
+pub mod gather;
+pub mod msg;
 pub mod play;
+pub mod redirect;
 pub mod response;
 pub mod say;
 
+use twiml::dial::*;
+use twiml::gather::*;
+use twiml::msg::*;
 use twiml::play::*;
-use twiml::response::*;
+use twiml::redirect::*;
+pub use twiml::response::*;
 use twiml::say::*;
 
 use std::io::Write;
@@ -13,6 +21,21 @@ use TwilioResult;
 pub trait Twiml {
     fn write<W: Write>(&self, w: &mut EventWriter<W>) -> TwilioResult<()>;
     fn build(&self) -> TwilioResult<String>;
+}
+
+#[derive(Debug)]
+pub enum Method {
+    Get,
+    Post,
+}
+
+impl Method {
+    fn to_str(&self) -> &str {
+        match *self {
+            Method::Get => "GET",
+            Method::Post => "POST",
+        }
+    }
 }
 
 #[cfg(test)]

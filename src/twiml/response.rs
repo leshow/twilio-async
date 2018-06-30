@@ -5,6 +5,10 @@ use xml::{writer::XmlEvent, EmitterConfig};
 pub struct Response<'a> {
     say: Option<Say<'a>>,
     play: Option<Play<'a>>,
+    msg: Option<Msg<'a>>,
+    redirect: Option<Redirect<'a>>,
+    gather: Option<Gather<'a>>,
+    dial: Option<Dial<'a>>,
 }
 
 impl<'a> Response<'a> {
@@ -12,19 +16,35 @@ impl<'a> Response<'a> {
         Response {
             say: None,
             play: None,
+            msg: None,
+            redirect: None,
+            gather: None,
+            dial: None,
         }
     }
-    pub fn say<S: Into<Say<'a>>>(self, say: S) -> Response<'a> {
-        Response {
-            say: Some(say.into()),
-            ..self
-        }
+    pub fn say<S: Into<Say<'a>>>(mut self, say: S) -> Self {
+        self.say = Some(say.into());
+        self
     }
-    pub fn play<P: Into<Play<'a>>>(self, play: P) -> Response<'a> {
-        Response {
-            play: Some(play.into()),
-            ..self
-        }
+    pub fn play<P: Into<Play<'a>>>(mut self, play: P) -> Self {
+        self.play = Some(play.into());
+        self
+    }
+    pub fn redirect<R: Into<Redirect<'a>>>(mut self, redirect: R) -> Self {
+        self.redirect = Some(redirect.into());
+        self
+    }
+    pub fn msg<M: Into<Msg<'a>>>(mut self, msg: M) -> Self {
+        self.msg = Some(msg.into());
+        self
+    }
+    pub fn gather(mut self, gather: Gather<'a>) -> Self {
+        self.gather = Some(gather);
+        self
+    }
+    pub fn dial<D: Into<Dial<'a>>>(mut self, dial: D) -> Self {
+        self.dial = Some(dial.into());
+        self
     }
 }
 
@@ -35,6 +55,18 @@ impl<'a> Twiml for Response<'a> {
             val.write(w)?;
         }
         if let Some(ref val) = self.play {
+            val.write(w)?;
+        }
+        if let Some(ref val) = self.redirect {
+            val.write(w)?;
+        }
+        if let Some(ref val) = self.msg {
+            val.write(w)?;
+        }
+        if let Some(ref val) = self.gather {
+            val.write(w)?;
+        }
+        if let Some(ref val) = self.dial {
             val.write(w)?;
         }
         w.write(XmlEvent::end_element())?;

@@ -1,6 +1,6 @@
-# Twilio (WIP)
+# Twilio (beta)
 
-A (presumably) fast, async, twilio API wrapper. Based on hyper & tokio.
+A (presumably) fast, async, twilio API wrapper. Based on hyper 0.11 (soon to be upgraded) & tokio.
 
 All types can run `run()` or a similar function. They return a value that implements `Deserialize`.
 
@@ -55,6 +55,8 @@ assert_eq!(resp.unwrap(), s.to_string());
 
 ## Beta software
 
-This library is a work in progress, messages and calls should work, there is untested code for conferences/recordings also, and I'm working on support twiml (Response/Say/Play is supported for now).
+This library is a work in progress, messages and calls should work, there is untested code for conferences/recordings also.
+
+A significant amount of the TwiML library is done, some of which is tested.
 
 PRs and suggestions are welcome.

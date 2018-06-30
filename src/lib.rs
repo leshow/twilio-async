@@ -34,7 +34,7 @@ pub use {
     std::{
         cell::{self, RefCell}, rc::Rc,
     }, tokio_core::reactor::Core,
-    url::form_urlencoded,
+    url::{form_urlencoded, Url},
 };
 
 #[derive(Debug)]
