@@ -1,6 +1,11 @@
 [package]
 name = "twilio"
-version = "0.1.0"
+version = "0.1.0-beta"
+description = "Async hyper wrapper for Twilio API and TwiML generation"
+repository = "https://github.com/leshow/twilio"
+license = "MIT"
+keywords = ["twilio", "twiml", "api", "async", "hyper"]
+categories = ["network-programming", "api-bindings", "web-programming", "web-programming::http-client", "web-programming::http-server"]
 authors = ["Evan Cameron <cameron.evan@gmail.com>"]
 
 [dependencies]
