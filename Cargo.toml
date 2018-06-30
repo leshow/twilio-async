@@ -1,6 +1,6 @@
 [package]
 name = "twilio-async"
-version = "0.1.0-beta"
+version = "0.1.1-beta"
 description = "An async and ergonomic wrapper around Twilio API & TwiML"
 readme = "README.md"
 repository = "https://github.com/leshow/twilio"
