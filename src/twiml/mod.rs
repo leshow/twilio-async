@@ -59,6 +59,7 @@ mod tests {
             .play("https://api.twilio.com/Cowbell.mp3")
             .build();
         let s = "<Response><Say voice=\"alice\" language=\"de\" loop=\"1\">Hello World</Say><Play loop=\"1\">https://api.twilio.com/Cowbell.mp3</Play></Response>";
+        assert_eq!(resp.unwrap(), s.to_string());
     }
 
     #[test]
