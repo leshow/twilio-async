@@ -1,6 +1,6 @@
 # Twilio (beta)
 
-A (presumably) fast, async, twilio API wrapper. Based on hyper 0.11 (soon to be upgraded) & tokio.
+An async and ergonomic wrapper around Twilio API & TwiML.
 
 All types can run `run()` or a similar function. They return a value that implements `Deserialize`.
 
