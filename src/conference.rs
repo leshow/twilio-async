@@ -64,7 +64,9 @@ impl<'a> TwilioRequest for Conferences<'a> {
 pub struct ListConferencesResp {
     pub conferences: Vec<ConferenceResp>,
     pub end: usize,
-    pub account_sid: String,
+    pub next_page_uri: Option<String>,
+    pub previous_page_uri: Option<String>,
+    pub uri: String,
     pub start: usize,
     pub page: usize,
     pub page_size: usize,
@@ -73,8 +75,8 @@ pub struct ListConferencesResp {
 #[derive(Deserialize, Debug)]
 pub struct ConferenceResp {
     pub account_sid: String,
-    pub date_created: String,
-    pub date_update: String,
+    pub date_created: Option<String>,
+    pub date_updated: String,
     pub friendly_name: String,
     pub region: String,
     pub sid: String,

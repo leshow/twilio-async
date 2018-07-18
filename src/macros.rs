@@ -12,7 +12,9 @@ macro_rules! execute {
                 D: for<'de> serde::Deserialize<'de>,
             {
                 use {
-                    futures::{future, Future, Stream}, hyper::{header, Request}, serde_json,
+                    futures::{future, Future, Stream},
+                    hyper::{header, Request},
+                    serde_json,
                 };
                 const BASE: &str = "https://api.twilio.com/2010-04-01/Accounts";
 
@@ -33,8 +35,8 @@ macro_rules! execute {
 
                 request.headers_mut().set(self.client.auth.clone());
                 let fut_req = self.client.client.request(request).and_then(|res| {
-                    // println!("Response: {}", res.status());
-                    // println!("Headers: \n{}", res.headers());
+                    println!("Response: {}", res.status());
+                    println!("Headers: \n{}", res.headers());
 
                     let header = res.headers().clone();
                     let status = res.status();

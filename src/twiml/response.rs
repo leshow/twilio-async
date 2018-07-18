@@ -1,7 +1,7 @@
 use twiml::*;
 use xml::{writer::XmlEvent, EmitterConfig};
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Response<'a> {
     say: Option<Say<'a>>,
     play: Option<Play<'a>>,
