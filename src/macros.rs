@@ -35,8 +35,8 @@ macro_rules! execute {
 
                 request.headers_mut().set(self.client.auth.clone());
                 let fut_req = self.client.client.request(request).and_then(|res| {
-                    println!("Response: {}", res.status());
-                    println!("Headers: \n{}", res.headers());
+                    // println!("Response: {}", res.status());
+                    // println!("Headers: \n{}", res.headers());
 
                     let header = res.headers().clone();
                     let status = res.status();
