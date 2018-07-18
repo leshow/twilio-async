@@ -9,6 +9,7 @@ pub struct Response<'a> {
     redirect: Option<Redirect<'a>>,
     gather: Option<Gather<'a>>,
     dial: Option<Dial<'a>>,
+    hangup: Option<Hangup>,
 }
 
 impl<'a> Response<'a> {
@@ -20,6 +21,7 @@ impl<'a> Response<'a> {
             redirect: None,
             gather: None,
             dial: None,
+            hangup: None,
         }
     }
     pub fn say<S: Into<Say<'a>>>(mut self, say: S) -> Self {
@@ -46,6 +48,10 @@ impl<'a> Response<'a> {
         self.dial = Some(dial.into());
         self
     }
+    pub fn hangup(mut self) -> Self {
+        self.hangup = Some(Hangup::new());
+        self
+    }
 }
 
 impl<'a> Twiml for Response<'a> {
@@ -67,6 +73,9 @@ impl<'a> Twiml for Response<'a> {
             val.write(w)?;
         }
         if let Some(ref val) = self.dial {
+            val.write(w)?;
+        }
+        if let Some(ref val) = self.hangup {
             val.write(w)?;
         }
         w.write(XmlEvent::end_element())?;

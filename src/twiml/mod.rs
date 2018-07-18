@@ -1,18 +1,20 @@
-pub mod dial;
-pub mod gather;
-pub mod msg;
-pub mod play;
-pub mod redirect;
-pub mod response;
-pub mod say;
+mod dial;
+mod gather;
+mod hangup;
+mod msg;
+mod play;
+mod redirect;
+mod response;
+mod say;
 
-use twiml::dial::*;
-use twiml::gather::*;
-use twiml::msg::*;
-use twiml::play::*;
-use twiml::redirect::*;
+pub use twiml::dial::*;
+pub use twiml::gather::*;
+pub use twiml::hangup::*;
+pub use twiml::msg::*;
+pub use twiml::play::*;
+pub use twiml::redirect::*;
 pub use twiml::response::*;
-use twiml::say::*;
+pub use twiml::say::*;
 
 use std::io::Write;
 use xml::writer::EventWriter;
@@ -79,5 +81,19 @@ mod tests {
             .build();
         let s = "<Play loop=\"3\">https://api.twilio.com/Cowbell.mp3</Play>";
         assert_eq!(play.unwrap(), s.to_string());
+    }
+
+    #[test]
+    fn twiml_response_dial() {
+        let resp = Response::new().dial("415-123-4567").build();
+        let s = "<Response><Dial method=\"POST\" timeout=\"30\" record=\"do-not-record\">415-123-4567</Dial></Response>";
+        assert_eq!(resp.unwrap(), s.to_string());
+    }
+
+    #[test]
+    fn twiml_response_hangup() {
+        let resp = Response::new().hangup().build();
+        let s = "<Response><Hangup /></Response>";
+        assert_eq!(resp.unwrap(), s.to_string());
     }
 }
