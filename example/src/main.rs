@@ -2,7 +2,7 @@ extern crate twilio_async;
 
 use std::env;
 use std::error::Error;
-use twilio_async::twiml::Dial;
+use twilio_async::twiml::{Dial, Response};
 use twilio_async::{MsgResp, Twilio, TwilioRequest};
 
 fn main() -> Result<(), Box<Error>> {
