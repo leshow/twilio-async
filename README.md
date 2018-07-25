@@ -1,4 +1,4 @@
-# Twilio (beta)
+# Twilio
 
 An async and ergonomic wrapper around Twilio API & TwiML.
 
