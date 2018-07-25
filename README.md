@@ -53,10 +53,10 @@ let s = "<Response><Say voice=\"man\" language=\"en\" loop=\"1\">Hello World</Sa
 assert_eq!(resp.unwrap(), s.to_string());
 ```
 
-## Beta software
+## Early release
 
-This library is a work in progress, messages and calls should work, there is untested code for conferences/recordings also.
+This library is a work in progress, messages and calls are tested, there is untested code for conferences/recordings.
 
-A significant amount of the TwiML library is done, some of which is tested.
+The TwiML work is complete and has some test coverage. Webhooks will be added.
 
 PRs and suggestions are welcome.
