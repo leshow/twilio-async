@@ -1,4 +1,4 @@
-# Twilio
+# twilio-async
 
 An async and ergonomic wrapper around Twilio API & TwiML.
 
