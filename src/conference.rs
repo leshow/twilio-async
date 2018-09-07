@@ -45,6 +45,65 @@ impl<'a> TwilioRequest for GetConference<'a> {
         }
     }
 }
+use futures::{future, Future, Stream};
+impl<'a> GetConference<'a> {
+    fn fut<U, D>(
+        self,
+        method: Method,
+        url: U,
+        body: Option<String>,
+    ) -> Result<
+        impl Future<Item = (hyper::Headers, hyper::StatusCode, Option<D>), Error = hyper::Error>,
+        TwilioErr,
+    >
+    where
+        U: AsRef<str>,
+        D: for<'de> serde::Deserialize<'de>,
+    {
+        use {
+            futures::{future, Future, Stream},
+            hyper::{header, Request},
+            serde_json,
+        };
+        const BASE: &str = "https://api.twilio.com/2010-04-01/Accounts";
+
+        let mut core_ref = self.client.core.try_borrow_mut()?;
+        let url = format!("{}/{}/{}", BASE, self.client.sid, url.as_ref()).parse::<hyper::Uri>()?;
+        // println!("{:?}", url);
+        let mut request = Request::new(method, url);
+
+        if let Some(body) = body {
+            // println!("{:?}", body);
+            request.set_body(body);
+            request
+                .headers_mut()
+                .set(header::ContentType::form_url_encoded());
+        }
+        // println!("{:?}", request);
+
+        request.headers_mut().set(self.client.auth.clone());
+        Ok(self.client.client.request(request).and_then(|res| {
+            // println!("Response: {}", res.status());
+            // println!("Headers: \n{}", res.headers());
+
+            let header = res.headers().clone();
+            let status = res.status();
+
+            res.body()
+                .fold(Vec::new(), |mut v, chunk| {
+                    v.extend(&chunk[..]);
+                    future::ok::<_, hyper::Error>(v)
+                }).map(move |chunks| {
+                    if chunks.is_empty() {
+                        Ok((header, status, None))
+                    } else {
+                        // println!("{:?}", String::from_utf8(chunks.clone()));
+                        Ok((header, status, Some(serde_json::from_slice(&chunks)?)))
+                    }
+                })
+        }))
+    }
+}
 
 // GET ALL CONFERENCES
 pub struct Conferences<'a> {

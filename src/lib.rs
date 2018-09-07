@@ -28,12 +28,17 @@ pub use recording::*;
 pub use {
     futures::{future, Future, Stream},
     hyper::{
-        client::HttpConnector, header::{self, Authorization, Basic}, Client, Method, Request,
+        client::HttpConnector,
+        header::{self, Authorization, Basic},
+        Client, Method, Request,
     },
-    hyper_tls::HttpsConnector, std::{borrow::Borrow, error::Error, fmt, io},
+    hyper_tls::HttpsConnector,
+    std::{borrow::Borrow, error::Error, fmt, io},
     std::{
-        cell::{self, RefCell}, rc::Rc,
-    }, tokio_core::reactor::Core,
+        cell::{self, RefCell},
+        rc::Rc,
+    },
+    tokio_core::reactor::Core,
     url::{form_urlencoded, Url},
 };
 
@@ -158,8 +163,7 @@ where
         .map(|pair| {
             let &(ref k, ref v) = pair.borrow();
             format!("{}={}", k.as_ref(), v.as_ref())
-        })
-        .fold(String::new(), |mut acc, item| {
+        }).fold(String::new(), |mut acc, item| {
             acc.push_str(&item);
             acc.push_str("&");
             acc
