@@ -6,7 +6,7 @@ macro_rules! execute {
                 method: Method,
                 url: U,
                 body: Option<String>,
-            ) -> Result<(hyperx::Headers, hyper::StatusCode, Option<D>), TwilioErr>
+            ) -> Result<(http::HeaderMap, hyper::StatusCode, Option<D>), TwilioErr>
             where
                 U: AsRef<str>,
                 D: for<'de> serde::Deserialize<'de>,
@@ -35,7 +35,7 @@ macro_rules! execute {
                 }
                 let mut auth = Headers::new();
                 auth.set(self.client.auth.clone());
-                request.header(AUTHORIZATION, auth.get()?);
+                request.header(AUTHORIZATION, auth.get().unwrap()); // TODO try_trait
 
                 let fut_req = self.client.client.request(request).and_then(|res| {
                     // println!("Response: {}", res.status());

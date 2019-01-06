@@ -1,7 +1,7 @@
 use hyper;
 use hyper_tls;
 use serde_json;
-use std::{cell, error::Error, fmt, io, string};
+use std::{cell, error::Error, fmt, io, option, string};
 use xml::writer;
 
 // Errors
@@ -9,7 +9,7 @@ use xml::writer;
 pub enum TwilioErr {
     Io(io::Error),
     TlsErr(hyper_tls::Error),
-    UrlParse(hyper::error::UriError),
+    UrlParse(http::uri::InvalidUri),
     NetworkErr(hyper::Error),
     SerdeErr(serde_json::Error),
     BorrowErr(cell::BorrowMutError),
@@ -54,7 +54,7 @@ impl fmt::Display for TwilioErr {
 from!(cell::BorrowMutError, BorrowErr);
 from!(hyper::Error, NetworkErr);
 from!(serde_json::Error, SerdeErr);
-from!(hyper::error::UriError, UrlParse);
+from!(http::uri::InvalidUri, UrlParse);
 from!(hyper_tls::Error, TlsErr);
 from!(io::Error, Io);
 from!(string::FromUtf8Error, Utf8Err);

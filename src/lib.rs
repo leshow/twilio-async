@@ -47,7 +47,7 @@ pub struct Twilio {
     core: Rc<RefCell<Core>>,
 }
 
-pub type TwilioResp<T> = Result<(hyperx::Headers, hyper::StatusCode, Option<T>), TwilioErr>;
+pub type TwilioResp<T> = Result<(http::HeaderMap, hyper::StatusCode, Option<T>), TwilioErr>;
 
 impl Twilio {
     pub fn new<S>(sid: S, token: S) -> TwilioResult<Twilio>
