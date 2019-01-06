@@ -2,6 +2,7 @@
 #[macro_use]
 extern crate serde_derive;
 extern crate futures;
+extern crate http;
 extern crate hyper;
 extern crate hyper_tls;
 extern crate serde;
@@ -19,28 +20,27 @@ mod message;
 mod recording;
 pub mod twiml;
 
-pub use call::*;
-pub use conference::*;
-pub use error::*;
-pub use message::*;
-pub use recording::*;
+pub use crate::{call::*, conference::*, error::*, message::*, recording::*};
 
-pub use {
-    futures::{future, Future, Stream},
-    hyper::{
-        client::HttpConnector, header::{self, Authorization, Basic}, Client, Method, Request,
-    },
-    hyper_tls::HttpsConnector, std::{borrow::Borrow, error::Error, fmt, io},
-    std::{
-        cell::{self, RefCell}, rc::Rc,
-    }, tokio_core::reactor::Core,
-    url::{form_urlencoded, Url},
+pub use futures::{future, Future, Stream};
+pub use http::Request;
+pub use hyper::{client::HttpConnector, Client, Method};
+pub use hyper_tls::HttpsConnector;
+pub use std::{
+    borrow::Borrow,
+    cell::{self, RefCell},
+    error::Error,
+    fmt, io,
+    rc::Rc,
 };
+pub use tokio_core::reactor::Core;
+pub use url::{form_urlencoded, Url};
 
 #[derive(Debug)]
 pub struct Twilio {
     sid: String,
-    auth: Authorization<Basic>,
+    username: String,
+    password: String,
     client: Rc<Client<HttpsConnector<HttpConnector>, hyper::Body>>,
     core: Rc<RefCell<Core>>,
 }
@@ -55,16 +55,13 @@ impl Twilio {
         let core = Core::new()?;
         let handle = core.handle();
         let username = sid.into();
-        let client = Client::configure()
-            .connector(HttpsConnector::new(4, &handle)?)
-            .build(&handle);
+        let password = token.into();
+        let client = Client::builder().build::<_, hyper::Body>(HttpsConnector::new(4)?);
 
         Ok(Twilio {
             sid: username.clone(),
-            auth: Authorization(Basic {
-                username,
-                password: Some(token.into()),
-            }),
+            username,
+            password,
             client: Rc::new(client),
             core: Rc::new(RefCell::new(core)),
         })

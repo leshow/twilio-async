@@ -1,6 +1,7 @@
-use twiml::*;
+use crate::twiml::*;
 use xml::{
-    writer::{EventWriter, XmlEvent}, EmitterConfig,
+    writer::{EventWriter, XmlEvent},
+    EmitterConfig,
 };
 
 #[derive(Debug)]
@@ -28,14 +29,17 @@ impl<'a> Say<'a> {
             language: "en",
         }
     }
+
     pub fn lang(mut self, language: &'a str) -> Say<'a> {
         self.language = language;
         self
     }
+
     pub fn voice(mut self, voice: Voice) -> Say<'a> {
         self.voice = voice;
         self
     }
+
     pub fn say_count(mut self, count: usize) -> Say<'a> {
         self.count = count;
         self
@@ -55,6 +59,7 @@ impl<'a> Twiml for Say<'a> {
         w.write(XmlEvent::end_element())?;
         Ok(())
     }
+
     fn build(&self) -> TwilioResult<String> {
         // Create a buffer and serialize our nodes into it
         let mut writer = Vec::with_capacity(30);

@@ -8,6 +8,7 @@ license = "MIT"
 keywords = ["twilio", "twiml", "api", "async", "hyper"]
 categories = ["network-programming", "api-bindings", "web-programming", "development-tools"]
 authors = ["Evan Cameron <cameron.evan@gmail.com>"]
+edition = "2018"
 
 [dependencies]
 hyper = "0.12.19"

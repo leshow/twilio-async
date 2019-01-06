@@ -1,6 +1,6 @@
+use super::{encode_pairs, url_encode, Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
 use hyper::{self, Method};
 use serde;
-use {encode_pairs, url_encode, Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
 
 #[derive(Default, Debug)]
 pub struct Msg<'a> {
@@ -29,7 +29,8 @@ impl<'a> ToString for Msg<'a> {
                 ("From", self.from),
                 ("Body", self.body),
                 ("MediaUrl", m_url),
-            ]).unwrap(),
+            ])
+            .unwrap(),
             None => {
                 encode_pairs(&[("To", self.to), ("From", self.from), ("Body", self.body)]).unwrap()
             }
@@ -84,6 +85,7 @@ execute!(SendMsg);
 
 impl<'a> TwilioRequest for SendMsg<'a> {
     type Resp = MsgResp;
+
     fn run(self) -> TwilioResp<Self::Resp> {
         let msg = self.msg.to_string();
         self.execute(Method::Post, "Messages.json", Some(msg))
@@ -100,6 +102,7 @@ execute!(GetMessage);
 
 impl<'a> TwilioRequest for GetMessage<'a> {
     type Resp = MsgResp;
+
     fn run(self) -> TwilioResp<Self::Resp> {
         let msg_sid = format!("Messages/{}.json", self.message_sid);
         self.execute(Method::Get, msg_sid, None)
@@ -111,10 +114,12 @@ impl<'a> GetMessage<'a> {
         let msg_sid = format!("Messages/{}.json", self.message_sid);
         self.execute(Method::Post, msg_sid, Some("Body=".into()))
     }
+
     pub fn delete(self) -> TwilioResp<MsgResp> {
         let msg_sid = format!("Messages/{}.json", self.message_sid);
         self.execute(Method::Delete, msg_sid, None)
     }
+
     pub fn media(self) -> TwilioResp<MediaResp> {
         let msg_sid = format!("Messages/{}/Media.json", self.message_sid);
         self.execute(Method::Get, msg_sid, None)
@@ -158,6 +163,7 @@ impl<'a> Messages<'a> {
             date_sent: None,
         }
     }
+
     pub fn on(self, date_sent: &'a str) -> MessagesDetails<'a> {
         MessagesDetails {
             client: &self.client,
@@ -172,6 +178,7 @@ execute!(Messages);
 
 impl<'a> TwilioRequest for Messages<'a> {
     type Resp = ListAllMsgs;
+
     fn run(self) -> TwilioResp<Self::Resp> {
         self.execute(Method::Get, "Messages.json", None)
     }
@@ -199,6 +206,7 @@ execute!(MessagesDetails);
 
 impl<'a> TwilioRequest for MessagesDetails<'a> {
     type Resp = ListAllMsgs;
+
     fn run(self) -> TwilioResp<Self::Resp> {
         let url = format!("Messages.json?{}", self.to_string());
         self.execute(Method::Get, url, None)

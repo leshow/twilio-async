@@ -1,4 +1,4 @@
-use twiml::*;
+use crate::twiml::*;
 use xml::{
     writer::{EventWriter, XmlEvent},
     EmitterConfig,
@@ -19,6 +19,7 @@ impl Twiml for Hangup {
         w.write(XmlEvent::end_element())?;
         Ok(())
     }
+
     fn build(&self) -> TwilioResult<String> {
         // Create a buffer and serialize our nodes into it
         let mut writer = Vec::with_capacity(30);

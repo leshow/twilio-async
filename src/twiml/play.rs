@@ -1,6 +1,7 @@
-use twiml::*;
+use crate::twiml::*;
 use xml::{
-    writer::{EventWriter, XmlEvent}, EmitterConfig,
+    writer::{EventWriter, XmlEvent},
+    EmitterConfig,
 };
 
 #[derive(Debug)]
@@ -13,6 +14,7 @@ impl<'a> Play<'a> {
     pub fn new(body: &'a str) -> Self {
         Play { body, count: 1 }
     }
+
     pub fn count(mut self, count: usize) -> Play<'a> {
         self.count = count;
         self
@@ -26,6 +28,7 @@ impl<'a> Twiml for Play<'a> {
         w.write(XmlEvent::end_element())?;
         Ok(())
     }
+
     fn build(&self) -> TwilioResult<String> {
         // Create a buffer and serialize our nodes into it
         let mut writer = Vec::with_capacity(30);

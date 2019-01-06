@@ -1,4 +1,4 @@
-use twiml::*;
+use crate::twiml::*;
 use xml::{
     writer::{EventWriter, XmlEvent},
     EmitterConfig,
@@ -34,22 +34,27 @@ impl<'a> Dial<'a> {
             ..Dial::default()
         }
     }
+
     pub fn method(mut self, method: Method) -> Self {
         self.method = method;
         self
     }
+
     pub fn action(mut self, url: &'a str) -> Self {
         self.action = Some(url);
         self
     }
+
     pub fn record(mut self, status: Record) -> Self {
         self.record = status;
         self
     }
+
     pub fn recording_callback(mut self, url: &'a str) -> Self {
         self.recording_callback = Some(url);
         self
     }
+
     pub fn timeout(mut self, timeout: usize) -> Self {
         self.timeout = timeout;
         self
@@ -97,12 +102,13 @@ impl<'a> Twiml for Dial<'a> {
         // if let Some(callback) = self.recording_callback {
         //     let el = el.attr("recordingStatusCallback", callback);
         // }
-        //w.write(el)?;
+        // w.write(el)?;
 
         w.write(self.number)?;
         w.write(XmlEvent::end_element())?;
         Ok(())
     }
+
     fn build(&self) -> TwilioResult<String> {
         // Create a buffer and serialize our nodes into it
         let mut writer = Vec::with_capacity(30);

@@ -1,6 +1,7 @@
-use twiml::*;
+use crate::twiml::*;
 use xml::{
-    writer::{EventWriter, XmlEvent}, EmitterConfig,
+    writer::{EventWriter, XmlEvent},
+    EmitterConfig,
 };
 
 #[derive(Debug)]
@@ -37,22 +38,27 @@ impl<'a> Gather<'a> {
         self.body = GatherBody::Say(say.into());
         self
     }
+
     pub fn play<P: Into<Play<'a>>>(mut self, play: P) -> Self {
         self.body = GatherBody::Play(play.into());
         self
     }
+
     pub fn redirect<R: Into<Redirect<'a>>>(mut self, redirect: R) -> Self {
         self.body = GatherBody::Redirect(redirect.into());
         self
     }
+
     pub fn method(mut self, method: Method) -> Self {
         self.method = method;
         self
     }
+
     pub fn finish_on_key(mut self, key: char) -> Self {
         self.key = key;
         self
     }
+
     pub fn timeout(mut self, timeout: usize) -> Self {
         self.timeout = timeout;
         self
@@ -82,6 +88,7 @@ impl<'a> Twiml for Gather<'a> {
         w.write(XmlEvent::end_element())?;
         Ok(())
     }
+
     fn build(&self) -> TwilioResult<String> {
         // Create a buffer and serialize our nodes into it
         let mut writer = Vec::with_capacity(30);

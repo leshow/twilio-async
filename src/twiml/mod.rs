@@ -7,18 +7,11 @@ mod redirect;
 mod response;
 mod say;
 
-pub use twiml::dial::*;
-pub use twiml::gather::*;
-pub use twiml::hangup::*;
-pub use twiml::msg::*;
-pub use twiml::play::*;
-pub use twiml::redirect::*;
-pub use twiml::response::*;
-pub use twiml::say::*;
+pub use crate::twiml::{dial::*, gather::*, hangup::*, msg::*, play::*, redirect::*, response::*, say::*};
 
+use crate::TwilioResult;
 use std::io::Write;
 use xml::writer::EventWriter;
-use TwilioResult;
 
 pub trait Twiml {
     fn write<W: Write>(&self, w: &mut EventWriter<W>) -> TwilioResult<()>;

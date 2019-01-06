@@ -1,6 +1,6 @@
+use super::{Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
 use hyper::{self, Method};
 use serde;
-use {Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
 
 #[derive(Debug, Default)]
 pub struct Recording<'a> {
@@ -23,6 +23,7 @@ execute!(GetRecording);
 
 impl<'a> TwilioRequest for GetRecording<'a> {
     type Resp = RecordingResp;
+
     fn run(self) -> TwilioResp<Self::Resp> {
         let url = format!("Recordings/{}.json", self.recording.sid);
         self.execute(Method::Get, url, None)
@@ -45,6 +46,7 @@ execute!(Recordings);
 
 impl<'a> TwilioRequest for Recordings<'a> {
     type Resp = ListRecordingResp;
+
     fn run(self) -> TwilioResp<Self::Resp> {
         self.execute(Method::Get, "Recordings.json", None)
     }
@@ -55,10 +57,12 @@ impl<'a> Recordings<'a> {
         let url = format!("Recordings.json?CallSid={}", call_sid);
         self.execute(Method::Get, url, None)
     }
+
     pub fn created(self, date_created: &'a str) -> TwilioResp<ListRecordingResp> {
         let url = format!("Recordings.json?DateCreated={}", date_created);
         self.execute(Method::Get, url, None)
     }
+
     pub fn range(self, before: &'a str, after: &'a str) -> TwilioResp<ListRecordingResp> {
         let url = format!(
             "Recordings.json?DateCreatedBefore={}&DateCreatedAfter={}",

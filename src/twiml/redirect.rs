@@ -1,6 +1,7 @@
-use twiml::*;
+use crate::twiml::*;
 use xml::{
-    writer::{EventWriter, XmlEvent}, EmitterConfig,
+    writer::{EventWriter, XmlEvent},
+    EmitterConfig,
 };
 
 #[derive(Debug)]
@@ -25,6 +26,7 @@ impl<'a> Redirect<'a> {
             ..Redirect::default()
         }
     }
+
     pub fn method(mut self, method: Method) -> Self {
         self.method = method;
         self
@@ -38,6 +40,7 @@ impl<'a> Twiml for Redirect<'a> {
         w.write(XmlEvent::end_element())?;
         Ok(())
     }
+
     fn build(&self) -> TwilioResult<String> {
         // Create a buffer and serialize our nodes into it
         let mut writer = Vec::with_capacity(30);

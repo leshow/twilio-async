@@ -1,6 +1,6 @@
+use super::{encode_pairs, Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
 use hyper::{self, Method};
 use serde;
-use {encode_pairs, Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
 
 #[derive(Debug, Default)]
 pub struct Call<'a> {
@@ -127,6 +127,7 @@ execute!(SendCall);
 
 impl<'a> TwilioRequest for SendCall<'a> {
     type Resp = CallResp;
+
     fn run(self) -> TwilioResp<Self::Resp> {
         let call = self.call.to_string();
         self.execute(Method::Post, "Calls.json", Some(call))
@@ -138,30 +139,37 @@ impl<'a> SendCall<'a> {
         self.call.sid = Some(sid);
         self
     }
+
     pub fn callerid(mut self, callerid: &'a str) -> SendCall<'a> {
         self.call.callerid = Some(callerid);
         self
     }
+
     pub fn machine_detection(mut self, machine_detection: bool) -> SendCall<'a> {
         self.call.machine_detection = Some(machine_detection);
         self
     }
+
     pub fn record(mut self, record: bool) -> SendCall<'a> {
         self.call.record = Some(record);
         self
     }
+
     pub fn send_digits(mut self, send_digits: &'a str) -> SendCall<'a> {
         self.call.send_digits = Some(send_digits);
         self
     }
+
     pub fn status_callback(mut self, callback: &'a str) -> SendCall<'a> {
         self.call.status_callback = Some(callback);
         self
     }
+
     pub fn callback_event(mut self, event: CallbackEvent) -> SendCall<'a> {
         self.call.callback_event = Some(event);
         self
     }
+
     pub fn timeout(mut self, timeout: &'a str) -> SendCall<'a> {
         self.call.timeout = Some(timeout);
         self

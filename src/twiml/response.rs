@@ -1,4 +1,4 @@
-use twiml::*;
+use crate::twiml::*;
 use xml::{writer::XmlEvent, EmitterConfig};
 
 #[derive(Debug, Default)]
@@ -24,30 +24,37 @@ impl<'a> Response<'a> {
             hangup: None,
         }
     }
+
     pub fn say<S: Into<Say<'a>>>(mut self, say: S) -> Self {
         self.say = Some(say.into());
         self
     }
+
     pub fn play<P: Into<Play<'a>>>(mut self, play: P) -> Self {
         self.play = Some(play.into());
         self
     }
+
     pub fn redirect<R: Into<Redirect<'a>>>(mut self, redirect: R) -> Self {
         self.redirect = Some(redirect.into());
         self
     }
+
     pub fn msg<M: Into<Msg<'a>>>(mut self, msg: M) -> Self {
         self.msg = Some(msg.into());
         self
     }
+
     pub fn gather(mut self, gather: Gather<'a>) -> Self {
         self.gather = Some(gather);
         self
     }
+
     pub fn dial<D: Into<Dial<'a>>>(mut self, dial: D) -> Self {
         self.dial = Some(dial.into());
         self
     }
+
     pub fn hangup(mut self) -> Self {
         self.hangup = Some(Hangup::new());
         self
@@ -81,6 +88,7 @@ impl<'a> Twiml for Response<'a> {
         w.write(XmlEvent::end_element())?;
         Ok(())
     }
+
     fn build(&self) -> TwilioResult<String> {
         // Create a buffer and serialize our nodes into it
         let mut writer = Vec::with_capacity(128);

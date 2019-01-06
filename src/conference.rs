@@ -1,6 +1,6 @@
+use super::{encode_pairs, Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
 use hyper::{self, Method};
 use serde;
-use {encode_pairs, Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
 
 #[derive(Debug, Default)]
 pub struct Conference<'a> {
@@ -33,6 +33,7 @@ execute!(GetConference);
 
 impl<'a> TwilioRequest for GetConference<'a> {
     type Resp = ConferenceResp;
+
     fn run(self) -> TwilioResp<Self::Resp> {
         let url = format!("Conferences/{}.json", self.conference.sid);
         match self.conference.status {
@@ -55,6 +56,7 @@ execute!(Conferences);
 
 impl<'a> TwilioRequest for Conferences<'a> {
     type Resp = ListConferencesResp;
+
     fn run(self) -> TwilioResp<Self::Resp> {
         self.execute(Method::Get, "Conferences.json", None)
     }
