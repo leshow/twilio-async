@@ -12,12 +12,12 @@ macro_rules! execute {
                 D: for<'de> serde::Deserialize<'de>,
             {
                 use futures::{future, Future, Stream};
-                // use http::HeaderMap;
+                use http::header::HeaderValue;
                 use hyper::{
                     header::{AUTHORIZATION, CONTENT_TYPE},
                     Request,
                 };
-                use hyperx::header::{Authorization, Headers};
+                use hyperx::header::Headers;
                 use serde_json;
                 const BASE: &str = "https://api.twilio.com/2010-04-01/Accounts";
 
@@ -26,18 +26,22 @@ macro_rules! execute {
                     .parse::<hyper::Uri>()?;
                 let mut request = Request::builder().method(method).uri(url);
 
-                if let Some(body) = body {
-                    // println!("{:?}", body);
-                    request.body(body);
-                    // let mut headers = HeaderMap::new();
-                    // headers.insert(CONTENT_TYPE, "application/x-www-form-urlencoded".parse()?);
-                    request.header(CONTENT_TYPE, "application/x-www-form-urlencoded".parse()?);
-                }
                 let mut auth = Headers::new();
                 auth.set(self.client.auth.clone());
                 request.header(AUTHORIZATION, auth.get().unwrap()); // TODO try_trait
 
-                let fut_req = self.client.client.request(request).and_then(|res| {
+                let req = match body {
+                    Some(body) => {
+                        request.header(
+                            CONTENT_TYPE,
+                            HeaderValue::from_static("application/x-www-form-urlencoded"),
+                        );
+                        request.body(hyper::Body::from(body))?
+                    }
+                    None => request.body(hyper::Body::empty())?,
+                };
+
+                let fut_req = self.client.client.request(req).and_then(|res| {
                     // println!("Response: {}", res.status());
                     // println!("Headers: \n{}", res.headers());
 

@@ -41,8 +41,6 @@ pub use url::{form_urlencoded, Url};
 pub struct Twilio {
     sid: String,
     auth: Authorization<Basic>,
-    // username: String,
-    // password: String,
     client: Rc<Client<HttpsConnector<HttpConnector>, hyper::Body>>,
     core: Rc<RefCell<Core>>,
 }

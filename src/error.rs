@@ -15,6 +15,8 @@ pub enum TwilioErr {
     BorrowErr(cell::BorrowMutError),
     Utf8Err(string::FromUtf8Error),
     EmitterErr(writer::Error),
+    HttpErr(http::Error),
+    HeaderErr(http::header::InvalidHeaderValue),
 }
 
 pub use super::TwilioErr::*;
@@ -32,6 +34,8 @@ impl Error for TwilioErr {
             BorrowErr(ref e) => e.description(),
             Utf8Err(ref e) => e.description(),
             EmitterErr(ref e) => e.description(),
+            HttpErr(ref e) => e.description(),
+            HeaderErr(ref e) => e.description(),
         }
     }
 }
@@ -47,6 +51,8 @@ impl fmt::Display for TwilioErr {
             BorrowErr(ref e) => write!(f, "Error trying to get client reference. {}", e),
             Utf8Err(ref e) => write!(f, "Error converting to utf-8 string: {}", e),
             EmitterErr(ref e) => write!(f, "Error emitting xml: {}", e),
+            HttpErr(ref e) => write!(f, "Http error when building req: {}", e),
+            HeaderErr(ref e) => write!(f, "Error creating header value: {}", e),
         }
     }
 }
@@ -59,3 +65,5 @@ from!(hyper_tls::Error, TlsErr);
 from!(io::Error, Io);
 from!(string::FromUtf8Error, Utf8Err);
 from!(writer::Error, EmitterErr);
+from!(http::Error, HttpErr);
+from!(http::header::InvalidHeaderValue, HeaderErr);
