@@ -6,34 +6,37 @@ macro_rules! execute {
                 method: Method,
                 url: U,
                 body: Option<String>,
-            ) -> Result<(hyper::Headers, hyper::StatusCode, Option<D>), TwilioErr>
+            ) -> Result<(hyperx::Headers, hyper::StatusCode, Option<D>), TwilioErr>
             where
                 U: AsRef<str>,
                 D: for<'de> serde::Deserialize<'de>,
             {
-                use {
-                    futures::{future, Future, Stream},
-                    hyper::{header, Request},
-                    serde_json,
+                use futures::{future, Future, Stream};
+                // use http::HeaderMap;
+                use hyper::{
+                    header::{AUTHORIZATION, CONTENT_TYPE},
+                    Request,
                 };
+                use hyperx::header::{Authorization, Headers};
+                use serde_json;
                 const BASE: &str = "https://api.twilio.com/2010-04-01/Accounts";
 
                 let mut core_ref = self.client.core.try_borrow_mut()?;
-                let url =
-                    format!("{}/{}/{}", BASE, self.client.sid, url.as_ref()).parse::<hyper::Uri>()?;
-                // println!("{:?}", url);
-                let mut request = Request::new(method, url);
+                let url = format!("{}/{}/{}", BASE, self.client.sid, url.as_ref())
+                    .parse::<hyper::Uri>()?;
+                let mut request = Request::builder().method(method).uri(url);
 
                 if let Some(body) = body {
                     // println!("{:?}", body);
-                    request.set_body(body);
-                    request
-                        .headers_mut()
-                        .set(header::ContentType::form_url_encoded());
+                    request.body(body);
+                    // let mut headers = HeaderMap::new();
+                    // headers.insert(CONTENT_TYPE, "application/x-www-form-urlencoded".parse()?);
+                    request.header(CONTENT_TYPE, "application/x-www-form-urlencoded".parse()?);
                 }
-                // println!("{:?}", request);
+                let mut auth = Headers::new();
+                auth.set(self.client.auth.clone());
+                request.header(AUTHORIZATION, auth.get()?);
 
-                request.headers_mut().set(self.client.auth.clone());
                 let fut_req = self.client.client.request(request).and_then(|res| {
                     // println!("Response: {}", res.status());
                     // println!("Headers: \n{}", res.headers());

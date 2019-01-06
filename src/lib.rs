@@ -22,8 +22,10 @@ mod recording;
 pub use crate::{call::*, conference::*, error::*, message::*, recording::*};
 
 pub use futures::{future, Future, Stream};
-pub use http::Request;
-pub use hyper::{client::HttpConnector, Client, Method};
+// pub use http::Request;
+pub use hyper::{client::HttpConnector, Client, Method, Request};
+pub use hyperx::header::{self, Authorization, Basic};
+// hyper::{client::HttpConnector, Client, Method};
 pub use hyper_tls::HttpsConnector;
 pub use std::{
     borrow::Borrow,
@@ -38,13 +40,14 @@ pub use url::{form_urlencoded, Url};
 #[derive(Debug)]
 pub struct Twilio {
     sid: String,
-    username: String,
-    password: String,
+    auth: Authorization<Basic>,
+    // username: String,
+    // password: String,
     client: Rc<Client<HttpsConnector<HttpConnector>, hyper::Body>>,
     core: Rc<RefCell<Core>>,
 }
 
-pub type TwilioResp<T> = Result<(hyper::Headers, hyper::StatusCode, Option<T>), TwilioErr>;
+pub type TwilioResp<T> = Result<(hyperx::Headers, hyper::StatusCode, Option<T>), TwilioErr>;
 
 impl Twilio {
     pub fn new<S>(sid: S, token: S) -> TwilioResult<Twilio>
@@ -54,13 +57,14 @@ impl Twilio {
         let core = Core::new()?;
         let handle = core.handle();
         let username = sid.into();
-        let password = token.into();
         let client = Client::builder().build::<_, hyper::Body>(HttpsConnector::new(4)?);
 
         Ok(Twilio {
             sid: username.clone(),
-            username,
-            password,
+            auth: Authorization(Basic {
+                username,
+                password: Some(token.into()),
+            }),
             client: Rc::new(client),
             core: Rc::new(RefCell::new(core)),
         })
