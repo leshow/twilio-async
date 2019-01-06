@@ -1,0 +1,9 @@
+[package]
+name = "twiml"
+version = "0.2.0"
+license = "MIT"
+authors = ["Evan Cameron <cameron.evan@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+twilio-async = { path = "../" }

@@ -38,11 +38,11 @@ impl<'a> TwilioRequest for GetConference<'a> {
         let url = format!("Conferences/{}.json", self.conference.sid);
         match self.conference.status {
             Some(status) => self.execute(
-                Method::Post,
+                Method::POST,
                 url,
                 Some(encode_pairs(&[("Status", status)]).unwrap()),
             ),
-            None => self.execute(Method::Get, url, None),
+            None => self.execute(Method::GET, url, None),
         }
     }
 }
@@ -58,7 +58,7 @@ impl<'a> TwilioRequest for Conferences<'a> {
     type Resp = ListConferencesResp;
 
     fn run(self) -> TwilioResp<Self::Resp> {
-        self.execute(Method::Get, "Conferences.json", None)
+        self.execute(Method::GET, "Conferences.json", None)
     }
 }
 

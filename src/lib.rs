@@ -18,7 +18,6 @@ mod conference;
 pub mod error;
 mod message;
 mod recording;
-pub mod twiml;
 
 pub use crate::{call::*, conference::*, error::*, message::*, recording::*};
 

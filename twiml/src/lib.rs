@@ -7,10 +7,12 @@ mod redirect;
 mod response;
 mod say;
 
-pub use crate::twiml::{dial::*, gather::*, hangup::*, msg::*, play::*, redirect::*, response::*, say::*};
+pub use crate::twiml::{
+    dial::*, gather::*, hangup::*, msg::*, play::*, redirect::*, response::*, say::*,
+};
 
-use crate::TwilioResult;
 use std::io::Write;
+use twilio_async::TwilioResult;
 use xml::writer::EventWriter;
 
 pub trait Twiml {

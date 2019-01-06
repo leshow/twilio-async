@@ -88,7 +88,7 @@ impl<'a> TwilioRequest for SendMsg<'a> {
 
     fn run(self) -> TwilioResp<Self::Resp> {
         let msg = self.msg.to_string();
-        self.execute(Method::Post, "Messages.json", Some(msg))
+        self.execute(Method::POST, "Messages.json", Some(msg))
     }
 }
 
@@ -105,24 +105,24 @@ impl<'a> TwilioRequest for GetMessage<'a> {
 
     fn run(self) -> TwilioResp<Self::Resp> {
         let msg_sid = format!("Messages/{}.json", self.message_sid);
-        self.execute(Method::Get, msg_sid, None)
+        self.execute(Method::GET, msg_sid, None)
     }
 }
 
 impl<'a> GetMessage<'a> {
     pub fn redact(self) -> TwilioResp<MsgResp> {
         let msg_sid = format!("Messages/{}.json", self.message_sid);
-        self.execute(Method::Post, msg_sid, Some("Body=".into()))
+        self.execute(Method::POST, msg_sid, Some("Body=".into()))
     }
 
     pub fn delete(self) -> TwilioResp<MsgResp> {
         let msg_sid = format!("Messages/{}.json", self.message_sid);
-        self.execute(Method::Delete, msg_sid, None)
+        self.execute(Method::DELETE, msg_sid, None)
     }
 
     pub fn media(self) -> TwilioResp<MediaResp> {
         let msg_sid = format!("Messages/{}/Media.json", self.message_sid);
-        self.execute(Method::Get, msg_sid, None)
+        self.execute(Method::GET, msg_sid, None)
     }
 }
 
@@ -180,7 +180,7 @@ impl<'a> TwilioRequest for Messages<'a> {
     type Resp = ListAllMsgs;
 
     fn run(self) -> TwilioResp<Self::Resp> {
-        self.execute(Method::Get, "Messages.json", None)
+        self.execute(Method::GET, "Messages.json", None)
     }
 }
 
@@ -209,7 +209,7 @@ impl<'a> TwilioRequest for MessagesDetails<'a> {
 
     fn run(self) -> TwilioResp<Self::Resp> {
         let url = format!("Messages.json?{}", self.to_string());
-        self.execute(Method::Get, url, None)
+        self.execute(Method::GET, url, None)
     }
 }
 

@@ -130,7 +130,7 @@ impl<'a> TwilioRequest for SendCall<'a> {
 
     fn run(self) -> TwilioResp<Self::Resp> {
         let call = self.call.to_string();
-        self.execute(Method::Post, "Calls.json", Some(call))
+        self.execute(Method::POST, "Calls.json", Some(call))
     }
 }
 

@@ -26,14 +26,14 @@ impl<'a> TwilioRequest for GetRecording<'a> {
 
     fn run(self) -> TwilioResp<Self::Resp> {
         let url = format!("Recordings/{}.json", self.recording.sid);
-        self.execute(Method::Get, url, None)
+        self.execute(Method::GET, url, None)
     }
 }
 
 impl<'a> GetRecording<'a> {
     pub fn delete(self) -> TwilioResp<Option<bool>> {
         let url = format!("Recordings/{}.json", self.recording.sid);
-        self.execute(Method::Delete, url, None)
+        self.execute(Method::DELETE, url, None)
     }
 }
 
@@ -48,19 +48,19 @@ impl<'a> TwilioRequest for Recordings<'a> {
     type Resp = ListRecordingResp;
 
     fn run(self) -> TwilioResp<Self::Resp> {
-        self.execute(Method::Get, "Recordings.json", None)
+        self.execute(Method::GET, "Recordings.json", None)
     }
 }
 
 impl<'a> Recordings<'a> {
     pub fn for_call(self, call_sid: &'a str) -> TwilioResp<ListRecordingResp> {
         let url = format!("Recordings.json?CallSid={}", call_sid);
-        self.execute(Method::Get, url, None)
+        self.execute(Method::GET, url, None)
     }
 
     pub fn created(self, date_created: &'a str) -> TwilioResp<ListRecordingResp> {
         let url = format!("Recordings.json?DateCreated={}", date_created);
-        self.execute(Method::Get, url, None)
+        self.execute(Method::GET, url, None)
     }
 
     pub fn range(self, before: &'a str, after: &'a str) -> TwilioResp<ListRecordingResp> {
@@ -68,7 +68,7 @@ impl<'a> Recordings<'a> {
             "Recordings.json?DateCreatedBefore={}&DateCreatedAfter={}",
             before, after
         );
-        self.execute(Method::Get, url, None)
+        self.execute(Method::GET, url, None)
     }
 }
 
