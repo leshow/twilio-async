@@ -4,6 +4,8 @@
 
 When updating to `hyper@0.12` I decided to change the API slightly. I never liked that twilio-async made decisions about the `Core` and event loop that the requests would run in, so `.run()` now returns a `Box<Future>`. I would have made it return an `impl Future` but this is currently impossible on stable as long as we lack existential return types from trait functions.
 
+There is a `runtime` feature I've added that includes `tokio_core` as a dependency, in this case, `.run()` will execute the request in an event loop that's provided by the library. i.e. We will keep a reference to `Core` and run requests there instead of returning `Futures`.
+
 ## Example Usage
 
 An async and ergonomic wrapper around Twilio API & TwiML.

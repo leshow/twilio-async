@@ -7,6 +7,7 @@ extern crate hyper;
 extern crate hyper_tls;
 extern crate serde;
 extern crate serde_json;
+#[cfg(feature = "runtime")]
 extern crate tokio_core;
 extern crate url;
 
@@ -31,6 +32,7 @@ pub use std::{
     fmt, io,
     rc::Rc,
 };
+#[cfg(feature = "runtime")]
 pub use tokio_core::reactor::Core;
 pub use typed_headers::{Authorization, Credentials};
 pub use url::{form_urlencoded, Url};
@@ -39,13 +41,17 @@ pub use url::{form_urlencoded, Url};
 pub struct Twilio {
     sid: String,
     auth: Authorization,
-    // client: Rc<Client<HttpsConnector<HttpConnector>, hyper::Body>>,
     client: Client<HttpsConnector<HttpConnector>, hyper::Body>,
-    // core: Rc<RefCell<Core>>,
+    #[cfg(feature = "runtime")]
+    core: Rc<RefCell<Core>>,
 }
 
+#[cfg(not(feature = "runtime"))]
 pub type TwilioResp<T> =
     Box<dyn Future<Item = (http::HeaderMap, hyper::StatusCode, Option<T>), Error = TwilioErr>>;
+
+#[cfg(feature = "runtime")]
+pub type TwilioResp<T> = Result<(http::HeaderMap, hyper::StatusCode, Option<T>), TwilioErr>;
 
 impl Twilio {
     pub fn new<S, P>(sid: S, token: P) -> TwilioResult<Twilio>
@@ -53,15 +59,18 @@ impl Twilio {
         S: Into<String>,
         P: AsRef<str>,
     {
-        // let core = Core::new()?;
         let sid = sid.into();
         let client = Client::builder().build::<_, hyper::Body>(HttpsConnector::new(4)?);
+
+        #[cfg(feature = "runtime")]
+        let core = Core::new()?;
 
         Ok(Twilio {
             auth: Authorization(Credentials::basic(&sid, token.as_ref())?),
             sid,
             client,
-            // core: Rc::new(RefCell::new(core)),
+            #[cfg(feature = "runtime")]
+            core: Rc::new(RefCell::new(core)),
         })
     }
 

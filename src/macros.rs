@@ -45,7 +45,9 @@ macro_rules! execute {
                 use futures::{future, Future, Stream};
                 use serde_json;
 
-                // let mut core_ref = self.client.core.try_borrow_mut()?;
+                #[cfg(feature = "runtime")]
+                let mut core_ref = self.client.core.try_borrow_mut()?;
+
                 let req = self.request(method, url, body).unwrap(); // ?
 
                 let fut_req = self
@@ -75,8 +77,12 @@ macro_rules! execute {
                             })
                     })
                     .map_err(TwilioErr::NetworkErr);
-                Box::new(fut_req)
-                // core_ref.run(fut_req)?
+
+                #[cfg(not(feature = "runtime"))]
+                return Box::new(fut_req);
+
+                #[cfg(feature = "runtime")]
+                return Ok(core_ref.run(fut_req)?);
             }
         }
     };
