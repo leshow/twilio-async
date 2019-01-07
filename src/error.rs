@@ -1,7 +1,7 @@
 use hyper;
 use hyper_tls;
 use serde_json;
-use std::{cell, error::Error, fmt, io, option, string};
+use std::{cell, error::Error, fmt, io, string};
 use xml::writer;
 
 // Errors
@@ -16,7 +16,7 @@ pub enum TwilioErr {
     Utf8Err(string::FromUtf8Error),
     EmitterErr(writer::Error),
     HttpErr(http::Error),
-    HeaderErr(http::header::InvalidHeaderValue),
+    HeaderErr(typed_headers::Error),
 }
 
 pub use super::TwilioErr::*;
@@ -66,4 +66,4 @@ from!(io::Error, Io);
 from!(string::FromUtf8Error, Utf8Err);
 from!(writer::Error, EmitterErr);
 from!(http::Error, HttpErr);
-from!(http::header::InvalidHeaderValue, HeaderErr);
+from!(typed_headers::Error, HeaderErr);

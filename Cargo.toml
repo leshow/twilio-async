@@ -15,7 +15,7 @@ edition = "2018"
 [dependencies]
 hyper = "0.12"
 hyper-tls = "0.3"
-hyperx = "0.14"
+typed-headers = "0.1"
 http = "0.1"
 url = "1.7"
 serde = "1.0"

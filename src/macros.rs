@@ -2,7 +2,7 @@ macro_rules! execute {
     ($x:ident) => {
         impl<'a> Execute for $x<'a> {
             fn request<U>(
-                self,
+                &self,
                 method: Method,
                 url: U,
                 body: Option<String>,
@@ -10,12 +10,9 @@ macro_rules! execute {
             where
                 U: AsRef<str>,
             {
-                use http::header::HeaderValue;
-                use hyper::{
-                    header::{HeaderMap, AUTHORIZATION, CONTENT_TYPE},
-                    Request,
-                };
-                use hyperx::header::{Authorization, Basic, Header, Headers};
+                use http::{header::HeaderValue, Request};
+                use hyper::header::{HeaderMap, CONTENT_TYPE};
+                use typed_headers::HeaderMapExt;
                 const BASE: &str = "https://api.twilio.com/2010-04-01/Accounts";
 
                 let url = format!("{}/{}/{}", BASE, self.client.sid, url.as_ref())
@@ -23,10 +20,11 @@ macro_rules! execute {
                 let mut request = Request::builder();
                 request.method(method).uri(url);
 
-                // let mut auth = Headers::new();
-                // auth.set(self.client.auth.clone());
-                // request.header(AUTHORIZATION, auth);
-
+                let mut hmap = HeaderMap::new();
+                hmap.typed_insert(&self.client.auth);
+                for (k, v) in hmap {
+                    request.header(k.unwrap().as_str(), v);
+                }
                 Ok(match body {
                     Some(body) => {
                         request.header(
@@ -44,7 +42,12 @@ macro_rules! execute {
                 method: Method,
                 url: U,
                 body: Option<String>,
-            ) -> Result<(http::HeaderMap, hyper::StatusCode, Option<D>), TwilioErr>
+            ) -> Box<
+                dyn futures::Future<
+                    Item = (http::HeaderMap, hyper::StatusCode, Option<D>),
+                    Error = TwilioErr,
+                >,
+            >
             where
                 U: AsRef<str>,
                 D: for<'de> serde::Deserialize<'de>,
@@ -52,13 +55,14 @@ macro_rules! execute {
                 use futures::{future, Future, Stream};
                 use serde_json;
 
-                let mut core_ref = self.client.core.try_borrow_mut()?;
+                // let mut core_ref = self.client.core.try_borrow_mut()?;
+                let req = self.request(method, url, body).unwrap(); // ?
 
                 let fut_req = self
                     .client
                     .client
-                    .request(self.request(method, url, body)?)
-                    .and_then(|res| {
+                    .request(req)
+                    .and_then(move |res| {
                         // println!("Response: {}", res.status());
                         // println!("Headers: \n{}", res.headers());
 
@@ -72,14 +76,17 @@ macro_rules! execute {
                             })
                             .map(move |chunks| {
                                 if chunks.is_empty() {
-                                    Ok((header, status, None))
+                                    (header, status, None)
                                 } else {
                                     // println!("{:?}", String::from_utf8(chunks.clone()));
-                                    Ok((header, status, Some(serde_json::from_slice(&chunks)?)))
+                                    let json_resp = serde_json::from_slice(&chunks).ok();
+                                    (header, status, json_resp)
                                 }
                             })
-                    });
-                core_ref.run(fut_req)?
+                    })
+                    .map_err(TwilioErr::NetworkErr);
+                Box::new(fut_req)
+                // core_ref.run(fut_req)?
             }
         }
     };

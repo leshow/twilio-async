@@ -24,7 +24,6 @@ pub use crate::{call::*, conference::*, error::*, message::*, recording::*};
 pub use futures::{future, Future, Stream};
 pub use hyper::{client::HttpConnector, Body, Client, Method, Request};
 pub use hyper_tls::HttpsConnector;
-pub use hyperx::header::{self, Authorization, Basic};
 pub use std::{
     borrow::Borrow,
     cell::{self, RefCell},
@@ -33,34 +32,36 @@ pub use std::{
     rc::Rc,
 };
 pub use tokio_core::reactor::Core;
+pub use typed_headers::{Authorization, Credentials};
 pub use url::{form_urlencoded, Url};
 
 #[derive(Debug)]
 pub struct Twilio {
     sid: String,
-    auth: Authorization<Basic>,
+    auth: Authorization,
     client: Rc<Client<HttpsConnector<HttpConnector>, hyper::Body>>,
     core: Rc<RefCell<Core>>,
 }
 
-pub type TwilioResp<T> = Result<(http::HeaderMap, hyper::StatusCode, Option<T>), TwilioErr>;
+// pub type TwilioResp<T> = Result<(http::HeaderMap, hyper::StatusCode,
+// Option<T>), TwilioErr>;
+pub type TwilioResp<T> = Box<
+    dyn futures::Future<Item = (http::HeaderMap, hyper::StatusCode, Option<T>), Error = TwilioErr>,
+>;
 
 impl Twilio {
-    pub fn new<S>(sid: S, token: S) -> TwilioResult<Twilio>
+    pub fn new<S, P>(sid: S, token: P) -> TwilioResult<Twilio>
     where
         S: Into<String>,
+        P: AsRef<str>,
     {
         let core = Core::new()?;
-        let handle = core.handle();
-        let username = sid.into();
+        let sid = sid.into();
         let client = Client::builder().build::<_, hyper::Body>(HttpsConnector::new(4)?);
 
         Ok(Twilio {
-            sid: username.clone(),
-            auth: Authorization(Basic {
-                username,
-                password: Some(token.into()),
-            }),
+            auth: Authorization(Credentials::basic(&sid, token.as_ref())?),
+            sid,
             client: Rc::new(client),
             core: Rc::new(RefCell::new(core)),
         })
@@ -80,7 +81,7 @@ impl Twilio {
         }
     }
 
-    pub fn msgs<'a>(&'a self) -> Messages<'a> {
+    pub fn msgs(&self) -> Messages<'_> {
         Messages { client: &self }
     }
 
@@ -98,7 +99,7 @@ impl Twilio {
         }
     }
 
-    pub fn conferences<'a>(&'a self) -> Conferences<'a> {
+    pub fn conferences(&self) -> Conferences<'_> {
         Conferences { client: &self }
     }
 
@@ -109,14 +110,14 @@ impl Twilio {
         }
     }
 
-    pub fn recordings<'a>(&'a self) -> Recordings<'a> {
+    pub fn recordings(&self) -> Recordings<'_> {
         Recordings { client: &self }
     }
 }
 
 pub trait Execute {
     fn request<U>(
-        self,
+        &self,
         method: Method,
         url: U,
         body: Option<String>,
