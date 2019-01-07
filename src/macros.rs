@@ -47,18 +47,18 @@ macro_rules! execute {
 
                 #[cfg(feature = "runtime")]
                 let mut core_ref = self.client.core.try_borrow_mut()?;
+                #[cfg(feature = "runtime")]
+                let req = self.request(method, url, body)?;
 
-                let req = self.request(method, url, body).unwrap(); // ?
+                #[cfg(not(feature = "runtime"))]
+                let req = self.request(method, url, body).unwrap();
 
                 let fut_req = self
                     .client
                     .client
                     .request(req)
                     .and_then(move |res| {
-                        // println!("Response: {}", res.status());
-                        // println!("Headers: \n{}", res.headers());
-
-                        let header = res.headers().clone();
+                        // let header = res.headers().clone();
                         let status = res.status();
 
                         res.into_body()
@@ -68,11 +68,10 @@ macro_rules! execute {
                             })
                             .map(move |chunks| {
                                 if chunks.is_empty() {
-                                    (header, status, None)
+                                    (status, None)
                                 } else {
-                                    // println!("{:?}", String::from_utf8(chunks.clone()));
                                     let json_resp = serde_json::from_slice(&chunks).ok();
-                                    (header, status, json_resp)
+                                    (status, json_resp)
                                 }
                             })
                     })

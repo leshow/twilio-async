@@ -96,13 +96,6 @@ impl<'a> Twiml for Dial<'a> {
                     .attr("recordingStatusCallback", callback),
             )?,
         }
-        // if let Some(action) = self.action {
-        //     let el = el.attr("action", action);
-        // }
-        // if let Some(callback) = self.recording_callback {
-        //     let el = el.attr("recordingStatusCallback", callback);
-        // }
-        // w.write(el)?;
 
         w.write(self.number)?;
         w.write(XmlEvent::end_element())?;

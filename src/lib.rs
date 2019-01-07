@@ -47,11 +47,10 @@ pub struct Twilio {
 }
 
 #[cfg(not(feature = "runtime"))]
-pub type TwilioResp<T> =
-    Box<dyn Future<Item = (http::HeaderMap, hyper::StatusCode, Option<T>), Error = TwilioErr>>;
+pub type TwilioResp<T> = Box<dyn Future<Item = (hyper::StatusCode, Option<T>), Error = TwilioErr>>;
 
 #[cfg(feature = "runtime")]
-pub type TwilioResp<T> = Result<(http::HeaderMap, hyper::StatusCode, Option<T>), TwilioErr>;
+pub type TwilioResp<T> = Result<(hyper::StatusCode, Option<T>), TwilioErr>;
 
 impl Twilio {
     pub fn new<S, P>(sid: S, token: P) -> TwilioResult<Twilio>
