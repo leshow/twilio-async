@@ -1,6 +1,12 @@
 [package]
 name = "twiml"
 version = "0.2.0"
+description = """
+An async and ergonomic wrapper around Twilio API & TwiML
+"""
+repository = "https://github.com/leshow/twilio"
+keywords = ["twilio", "twiml", "api"]
+categories = ["network-programming", "api-bindings", "web-programming", "development-tools"]
 license = "MIT"
 authors = ["Evan Cameron <cameron.evan@gmail.com>"]
 edition = "2018"
