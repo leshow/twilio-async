@@ -1,10 +1,10 @@
-use crate::twiml::*;
+use crate::*;
 use xml::{
     writer::{EventWriter, XmlEvent},
     EmitterConfig,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Hangup;
 
 impl Hangup {
@@ -14,13 +14,13 @@ impl Hangup {
 }
 
 impl Twiml for Hangup {
-    fn write<W: Write>(&self, w: &mut EventWriter<W>) -> TwilioResult<()> {
+    fn write<W: Write>(&self, w: &mut EventWriter<W>) -> TwimlResult<()> {
         w.write(XmlEvent::start_element("Hangup"))?;
         w.write(XmlEvent::end_element())?;
         Ok(())
     }
 
-    fn build(&self) -> TwilioResult<String> {
+    fn build(&self) -> TwimlResult<String> {
         // Create a buffer and serialize our nodes into it
         let mut writer = Vec::with_capacity(30);
         {

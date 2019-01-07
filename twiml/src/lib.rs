@@ -1,4 +1,5 @@
 mod dial;
+pub mod error;
 mod gather;
 mod hangup;
 mod msg;
@@ -7,17 +8,16 @@ mod redirect;
 mod response;
 mod say;
 
-pub use crate::twiml::{
-    dial::*, gather::*, hangup::*, msg::*, play::*, redirect::*, response::*, say::*,
+pub use crate::{
+    dial::*, error::*, gather::*, hangup::*, msg::*, play::*, redirect::*, response::*, say::*,
 };
 
 use std::io::Write;
-use twilio_async::TwilioResult;
 use xml::writer::EventWriter;
 
 pub trait Twiml {
-    fn write<W: Write>(&self, w: &mut EventWriter<W>) -> TwilioResult<()>;
-    fn build(&self) -> TwilioResult<String>;
+    fn write<W: Write>(&self, w: &mut EventWriter<W>) -> TwimlResult<()>;
+    fn build(&self) -> TwimlResult<String>;
 }
 
 #[derive(Debug)]

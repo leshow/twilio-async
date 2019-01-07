@@ -9,7 +9,6 @@ extern crate serde;
 extern crate serde_json;
 extern crate tokio_core;
 extern crate url;
-extern crate xml;
 
 #[macro_use]
 mod macros;
@@ -18,6 +17,7 @@ mod conference;
 pub mod error;
 mod message;
 mod recording;
+pub mod twiml;
 
 pub use crate::{call::*, conference::*, error::*, message::*, recording::*};
 

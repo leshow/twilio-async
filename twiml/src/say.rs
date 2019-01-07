@@ -1,4 +1,4 @@
-use crate::twiml::*;
+use crate::*;
 use xml::{
     writer::{EventWriter, XmlEvent},
     EmitterConfig,
@@ -47,7 +47,7 @@ impl<'a> Say<'a> {
 }
 
 impl<'a> Twiml for Say<'a> {
-    fn write<W: Write>(&self, w: &mut EventWriter<W>) -> TwilioResult<()> {
+    fn write<W: Write>(&self, w: &mut EventWriter<W>) -> TwimlResult<()> {
         // Create a buffer and serialize our nodes into it
         w.write(
             XmlEvent::start_element("Say")
@@ -60,7 +60,7 @@ impl<'a> Twiml for Say<'a> {
         Ok(())
     }
 
-    fn build(&self) -> TwilioResult<String> {
+    fn build(&self) -> TwimlResult<String> {
         // Create a buffer and serialize our nodes into it
         let mut writer = Vec::with_capacity(30);
         {

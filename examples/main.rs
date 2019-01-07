@@ -1,24 +1,30 @@
+extern crate tokio_core;
 extern crate twilio_async;
 
-use std::env;
-use std::error::Error;
-use twilio_async::twiml::{Dial, Response};
-use twilio_async::{MsgResp, Twilio, TwilioRequest};
+use std::{env, error::Error};
+use tokio_core::reactor::Core;
+use twilio_async::{
+    twiml::{Dial, Response},
+    MsgResp, Twilio, TwilioRequest,
+};
 
 fn main() -> Result<(), Box<Error>> {
     let twilio = Twilio::new(env::var("TWILIO_SID")?, env::var("TWILIO_TOKEN")?)?;
-    // try_msg(twilio)?;
-    // try_call(twilio)?;
-    try_conference(twilio)?;
+    let mut core = Core::new()?;
+    // try_msg(core, twilio)?;
+    // try_call(core, twilio)?;
+    try_conference(core, twilio)?;
     Ok(())
 }
 
-fn try_conference(twilio: Twilio) -> Result<(), Box<Error>> {
-    let (_, _, resp) = twilio.conferences().run()?;
+fn try_conference(core: Core, twilio: Twilio) -> Result<(), Box<Error>> {
+    let (_, _, resp) = core.run(twilio.conferences().run())?;
 
-    let (_, _, resp) = twilio
-        .conference("EH5bc4f5c62684f43d0acadb3d88a43e38")
-        .run()?;
+    let (_, _, resp) = core.run(
+        twilio
+            .conference("EH5bc4f5c62684f43d0acadb3d88a43e38")
+            .run(),
+    )?;
 
     println!("{:?}", resp);
     Ok(())

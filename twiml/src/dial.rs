@@ -1,4 +1,4 @@
-use crate::twiml::*;
+use crate::*;
 use xml::{
     writer::{EventWriter, XmlEvent},
     EmitterConfig,
@@ -79,7 +79,7 @@ impl Record {
 }
 
 impl<'a> Twiml for Dial<'a> {
-    fn write<W: Write>(&self, w: &mut EventWriter<W>) -> TwilioResult<()> {
+    fn write<W: Write>(&self, w: &mut EventWriter<W>) -> TwimlResult<()> {
         let timeout = self.timeout.to_string();
         let el = XmlEvent::start_element("Dial")
             .attr("method", self.method.to_str())
@@ -109,7 +109,7 @@ impl<'a> Twiml for Dial<'a> {
         Ok(())
     }
 
-    fn build(&self) -> TwilioResult<String> {
+    fn build(&self) -> TwimlResult<String> {
         // Create a buffer and serialize our nodes into it
         let mut writer = Vec::with_capacity(30);
         {

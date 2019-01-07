@@ -1,4 +1,4 @@
-use crate::twiml::*;
+use crate::*;
 use xml::{
     writer::{EventWriter, XmlEvent},
     EmitterConfig,
@@ -66,7 +66,7 @@ impl<'a> Gather<'a> {
 }
 
 impl<'a> Twiml for Gather<'a> {
-    fn write<W: Write>(&self, w: &mut EventWriter<W>) -> TwilioResult<()> {
+    fn write<W: Write>(&self, w: &mut EventWriter<W>) -> TwimlResult<()> {
         let timeout = self.timeout.to_string();
         let key = self.key.to_string();
         let el = XmlEvent::start_element("Gather")
@@ -89,7 +89,7 @@ impl<'a> Twiml for Gather<'a> {
         Ok(())
     }
 
-    fn build(&self) -> TwilioResult<String> {
+    fn build(&self) -> TwimlResult<String> {
         // Create a buffer and serialize our nodes into it
         let mut writer = Vec::with_capacity(30);
         {
