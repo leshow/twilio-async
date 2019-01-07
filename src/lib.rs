@@ -41,7 +41,7 @@ pub struct Twilio {
     auth: Authorization,
     // client: Rc<Client<HttpsConnector<HttpConnector>, hyper::Body>>,
     client: Client<HttpsConnector<HttpConnector>, hyper::Body>,
-    core: Rc<RefCell<Core>>,
+    // core: Rc<RefCell<Core>>,
 }
 
 pub type TwilioResp<T> =
@@ -53,7 +53,7 @@ impl Twilio {
         S: Into<String>,
         P: AsRef<str>,
     {
-        let core = Core::new()?;
+        // let core = Core::new()?;
         let sid = sid.into();
         let client = Client::builder().build::<_, hyper::Body>(HttpsConnector::new(4)?);
 
@@ -61,7 +61,7 @@ impl Twilio {
             auth: Authorization(Credentials::basic(&sid, token.as_ref())?),
             sid,
             client,
-            core: Rc::new(RefCell::new(core)),
+            // core: Rc::new(RefCell::new(core)),
         })
     }
 
