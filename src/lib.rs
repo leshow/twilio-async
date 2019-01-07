@@ -22,11 +22,9 @@ mod recording;
 pub use crate::{call::*, conference::*, error::*, message::*, recording::*};
 
 pub use futures::{future, Future, Stream};
-// pub use http::Request;
-pub use hyper::{client::HttpConnector, Client, Method, Request};
-pub use hyperx::header::{self, Authorization, Basic};
-// hyper::{client::HttpConnector, Client, Method};
+pub use hyper::{client::HttpConnector, Body, Client, Method, Request};
 pub use hyper_tls::HttpsConnector;
+pub use hyperx::header::{self, Authorization, Basic};
 pub use std::{
     borrow::Borrow,
     cell::{self, RefCell},
@@ -117,6 +115,14 @@ impl Twilio {
 }
 
 pub trait Execute {
+    fn request<U>(
+        self,
+        method: Method,
+        url: U,
+        body: Option<String>,
+    ) -> Result<Request<Body>, TwilioErr>
+    where
+        U: AsRef<str>;
     fn execute<U, D>(self, method: Method, url: U, body: Option<String>) -> TwilioResp<D>
     where
         U: AsRef<str>,
