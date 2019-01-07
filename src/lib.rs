@@ -39,12 +39,11 @@ pub use url::{form_urlencoded, Url};
 pub struct Twilio {
     sid: String,
     auth: Authorization,
-    client: Rc<Client<HttpsConnector<HttpConnector>, hyper::Body>>,
+    // client: Rc<Client<HttpsConnector<HttpConnector>, hyper::Body>>,
+    client: Client<HttpsConnector<HttpConnector>, hyper::Body>,
     core: Rc<RefCell<Core>>,
 }
 
-// pub type TwilioResp<T> = Result<(http::HeaderMap, hyper::StatusCode,
-// Option<T>), TwilioErr>;
 pub type TwilioResp<T> = Box<
     dyn futures::Future<Item = (http::HeaderMap, hyper::StatusCode, Option<T>), Error = TwilioErr>,
 >;
@@ -62,7 +61,7 @@ impl Twilio {
         Ok(Twilio {
             auth: Authorization(Credentials::basic(&sid, token.as_ref())?),
             sid,
-            client: Rc::new(client),
+            client,
             core: Rc::new(RefCell::new(core)),
         })
     }
