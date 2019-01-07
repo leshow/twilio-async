@@ -2,7 +2,7 @@
 name = "twiml"
 version = "0.2.0"
 description = """
-An async and ergonomic wrapper around Twilio API & TwiML
+Typesafe construction of Twilio TwiML
 """
 repository = "https://github.com/leshow/twilio"
 keywords = ["twilio", "twiml", "api"]
