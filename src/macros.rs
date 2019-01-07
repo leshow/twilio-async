@@ -37,17 +37,7 @@ macro_rules! execute {
                 })
             }
 
-            fn execute<U, D>(
-                self,
-                method: Method,
-                url: U,
-                body: Option<String>,
-            ) -> Box<
-                dyn futures::Future<
-                    Item = (http::HeaderMap, hyper::StatusCode, Option<D>),
-                    Error = TwilioErr,
-                >,
-            >
+            fn execute<U, D>(self, method: Method, url: U, body: Option<String>) -> TwilioResp<D>
             where
                 U: AsRef<str>,
                 D: for<'de> serde::Deserialize<'de>,

@@ -44,9 +44,8 @@ pub struct Twilio {
     core: Rc<RefCell<Core>>,
 }
 
-pub type TwilioResp<T> = Box<
-    dyn futures::Future<Item = (http::HeaderMap, hyper::StatusCode, Option<T>), Error = TwilioErr>,
->;
+pub type TwilioResp<T> =
+    Box<dyn Future<Item = (http::HeaderMap, hyper::StatusCode, Option<T>), Error = TwilioErr>>;
 
 impl Twilio {
     pub fn new<S, P>(sid: S, token: P) -> TwilioResult<Twilio>
