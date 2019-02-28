@@ -20,8 +20,7 @@ fn try_conference(twilio: Twilio) -> Result<(), Box<Error>> {
     let (_, resp) = 
         twilio
             .conference("EH5bc4f5c62684f43d0acadb3d88a43e38")
-            .run(),
-    ?;
+            .run()?;
 
     println!("{:?}", resp);
     Ok(())
