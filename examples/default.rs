@@ -4,11 +4,11 @@ extern crate twilio_async;
 use std::{env, error::Error};
 use tokio_core::reactor::Core;
 use twilio_async::{
-    twiml::{Dial, Response, Twiml},
+    twiml::{Dial, Twiml},
     MsgResp, Twilio, TwilioRequest,
 };
 
-fn main() -> Result<(), Box<Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
     let twilio = Twilio::new(env::var("TWILIO_SID")?, env::var("TWILIO_TOKEN")?)?;
     let mut core = Core::new()?;
     try_msg(&mut core, twilio)?;
@@ -19,7 +19,7 @@ fn main() -> Result<(), Box<Error>> {
     Ok(())
 }
 
-fn try_conference(core: &mut Core, twilio: Twilio) -> Result<(), Box<Error>> {
+fn _try_conference(core: &mut Core, twilio: Twilio) -> Result<(), Box<dyn Error>> {
     let (_, resp) = core.run(twilio.conferences().run())?;
 
     println!("{:?}", resp);
@@ -34,7 +34,7 @@ fn try_conference(core: &mut Core, twilio: Twilio) -> Result<(), Box<Error>> {
     Ok(())
 }
 
-fn try_msg(core: &mut Core, twilio: Twilio) -> Result<(), Box<Error>> {
+fn try_msg(core: &mut Core, twilio: Twilio) -> Result<(), Box<dyn Error>> {
     let num = env::var("OUTBOUND_NUM")?;
     // sending a message
     let (_, resp) = core.run(twilio.send_msg("18193074013", &num, "Hello World").run())?;
@@ -50,6 +50,7 @@ fn try_msg(core: &mut Core, twilio: Twilio) -> Result<(), Box<Error>> {
     // get individual msg
     if let Some(json) = resp {
         let MsgResp { sid, .. } = json;
+        println!("msg sid {:?}", sid);
         let (_, resp) = core.run(twilio.msg("MMec83347e541440f389e24377dd901af7").run())?;
         println!("{:?}", resp);
     }
@@ -68,7 +69,7 @@ fn try_msg(core: &mut Core, twilio: Twilio) -> Result<(), Box<Error>> {
     Ok(())
 }
 
-fn try_call(core: &mut Core, twilio: Twilio) -> Result<(), Box<Error>> {
+fn _try_call(core: &mut Core, twilio: Twilio) -> Result<(), Box<dyn Error>> {
     let (_, resp) = core.run(
         twilio
             .call(
