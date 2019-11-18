@@ -1,15 +1,6 @@
 #![allow(dead_code)]
 #[macro_use]
-extern crate serde_derive;
-extern crate futures;
-extern crate http;
-extern crate hyper;
-extern crate hyper_tls;
-extern crate serde;
-extern crate serde_json;
-#[cfg(feature = "runtime")]
-extern crate tokio_core;
-extern crate url;
+extern crate async_trait;
 
 #[macro_use]
 mod macros;
@@ -22,18 +13,10 @@ pub mod twiml;
 
 pub use crate::{call::*, conference::*, error::*, message::*, recording::*};
 
-pub use futures::{future, Future, Stream};
-pub use hyper::{client::HttpConnector, Body, Client, Method, Request};
-pub use hyper_tls::HttpsConnector;
-pub use std::{
-    borrow::Borrow,
-    cell::{self, RefCell},
-    error::Error,
-    fmt, io,
-    rc::Rc,
-};
-#[cfg(feature = "runtime")]
-pub use tokio_core::reactor::Core;
+use hyper::{client::HttpConnector, Body, Client, Method, Request};
+use hyper_tls::HttpsConnector;
+use std::borrow::Borrow;
+
 pub use typed_headers::{Authorization, Credentials};
 pub use url::{form_urlencoded, Url};
 
@@ -42,14 +25,8 @@ pub struct Twilio {
     sid: String,
     auth: Authorization,
     client: Client<HttpsConnector<HttpConnector>, hyper::Body>,
-    #[cfg(feature = "runtime")]
-    core: Rc<RefCell<Core>>,
 }
 
-#[cfg(not(feature = "runtime"))]
-pub type TwilioResp<T> = Box<dyn Future<Item = (hyper::StatusCode, Option<T>), Error = TwilioErr>>;
-
-#[cfg(feature = "runtime")]
 pub type TwilioResp<T> = Result<(hyper::StatusCode, Option<T>), TwilioErr>;
 
 impl Twilio {
@@ -59,7 +36,7 @@ impl Twilio {
         P: AsRef<str>,
     {
         let sid = sid.into();
-        let client = Client::builder().build::<_, hyper::Body>(HttpsConnector::new(4)?);
+        let client = Client::builder().build::<_, hyper::Body>(HttpsConnector::new()?);
 
         #[cfg(feature = "runtime")]
         let core = Core::new()?;
@@ -121,6 +98,7 @@ impl Twilio {
     }
 }
 
+#[async_trait]
 pub trait Execute {
     fn request<U>(
         &self,
@@ -130,15 +108,16 @@ pub trait Execute {
     ) -> Result<Request<Body>, TwilioErr>
     where
         U: AsRef<str>;
-    fn execute<U, D>(self, method: Method, url: U, body: Option<String>) -> TwilioResp<D>
+    async fn execute<U, D>(&self, method: Method, url: U, body: Option<String>) -> TwilioResp<D>
     where
-        U: AsRef<str>,
+        U: AsRef<str> + Send,
         D: for<'de> serde::Deserialize<'de>;
 }
 
+#[async_trait]
 pub trait TwilioRequest: Execute {
     type Resp: for<'de> serde::Deserialize<'de>;
-    fn run(self) -> TwilioResp<Self::Resp>;
+    async fn run(&self) -> TwilioResp<Self::Resp>;
 }
 
 pub fn encode_pairs<I, K, V>(pairs: I) -> Option<String>

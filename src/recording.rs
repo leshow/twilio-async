@@ -1,6 +1,6 @@
 use super::{Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
 use hyper::{self, Method};
-use serde;
+use serde::Deserialize;
 
 #[derive(Debug, Default)]
 pub struct Recording<'a> {
@@ -21,19 +21,20 @@ pub struct GetRecording<'a> {
 
 execute!(GetRecording);
 
+#[async_trait]
 impl<'a> TwilioRequest for GetRecording<'a> {
     type Resp = RecordingResp;
 
-    fn run(self) -> TwilioResp<Self::Resp> {
+    async fn run(&self) -> TwilioResp<Self::Resp> {
         let url = format!("Recordings/{}.json", self.recording.sid);
-        self.execute(Method::GET, url, None)
+        self.execute(Method::GET, url, None).await
     }
 }
 
 impl<'a> GetRecording<'a> {
-    pub fn delete(self) -> TwilioResp<Option<bool>> {
+    pub async fn delete(&self) -> TwilioResp<Option<bool>> {
         let url = format!("Recordings/{}.json", self.recording.sid);
-        self.execute(Method::DELETE, url, None)
+        self.execute(Method::DELETE, url, None).await
     }
 }
 
@@ -44,31 +45,32 @@ pub struct Recordings<'a> {
 
 execute!(Recordings);
 
+#[async_trait]
 impl<'a> TwilioRequest for Recordings<'a> {
     type Resp = ListRecordingResp;
 
-    fn run(self) -> TwilioResp<Self::Resp> {
-        self.execute(Method::GET, "Recordings.json", None)
+    async fn run(&self) -> TwilioResp<Self::Resp> {
+        self.execute(Method::GET, "Recordings.json", None).await
     }
 }
 
 impl<'a> Recordings<'a> {
-    pub fn for_call(self, call_sid: &'a str) -> TwilioResp<ListRecordingResp> {
+    pub async fn for_call(&self, call_sid: &'a str) -> TwilioResp<ListRecordingResp> {
         let url = format!("Recordings.json?CallSid={}", call_sid);
-        self.execute(Method::GET, url, None)
+        self.execute(Method::GET, url, None).await
     }
 
-    pub fn created(self, date_created: &'a str) -> TwilioResp<ListRecordingResp> {
+    pub async fn created(&self, date_created: &'a str) -> TwilioResp<ListRecordingResp> {
         let url = format!("Recordings.json?DateCreated={}", date_created);
-        self.execute(Method::GET, url, None)
+        self.execute(Method::GET, url, None).await
     }
 
-    pub fn range(self, before: &'a str, after: &'a str) -> TwilioResp<ListRecordingResp> {
+    pub async fn range(&self, before: &'a str, after: &'a str) -> TwilioResp<ListRecordingResp> {
         let url = format!(
             "Recordings.json?DateCreatedBefore={}&DateCreatedAfter={}",
             before, after
         );
-        self.execute(Method::GET, url, None)
+        self.execute(Method::GET, url, None).await
     }
 }
 

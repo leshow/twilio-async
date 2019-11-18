@@ -1,6 +1,7 @@
 macro_rules! execute {
-    ($x:ident) => {
-        impl<'a> Execute for $x<'a> {
+    ($ty:tt) => {
+        #[async_trait]
+        impl<'a> Execute for $ty<'a> {
             fn request<U>(
                 &self,
                 method: Method,
@@ -37,51 +38,38 @@ macro_rules! execute {
                 })
             }
 
-            fn execute<U, D>(self, method: Method, url: U, body: Option<String>) -> TwilioResp<D>
+            async fn execute<U, D>(
+                &self,
+                method: Method,
+                url: U,
+                body: Option<String>,
+            ) -> TwilioResp<D>
             where
-                U: AsRef<str>,
+                U: AsRef<str> + Send,
                 D: for<'de> serde::Deserialize<'de>,
             {
-                use futures::{future, Future, Stream};
+                use futures::stream::TryStreamExt;
                 use serde_json;
 
-                #[cfg(feature = "runtime")]
-                let mut core_ref = self.client.core.try_borrow_mut()?;
-                #[cfg(feature = "runtime")]
-                let req = self.request(method, url, body)?;
-
-                #[cfg(not(feature = "runtime"))]
                 let req = self.request(method, url, body).unwrap();
 
-                let fut_req = self
+                let mut res = self
                     .client
                     .client
                     .request(req)
-                    .and_then(move |res| {
-                        // let header = res.headers().clone();
-                        let status = res.status();
+                    .await
+                    .map_err(TwilioErr::NetworkErr)?;
 
-                        res.into_body()
-                            .fold(Vec::new(), |mut v, chunk| {
-                                v.extend(&chunk[..]);
-                                future::ok::<_, hyper::Error>(v)
-                            })
-                            .map(move |chunks| {
-                                if chunks.is_empty() {
-                                    (status, None)
-                                } else {
-                                    let json_resp = serde_json::from_slice(&chunks).ok();
-                                    (status, json_resp)
-                                }
-                            })
-                    })
-                    .map_err(TwilioErr::NetworkErr);
+                let status = res.status();
 
-                #[cfg(not(feature = "runtime"))]
-                return Box::new(fut_req);
+                let body = res.body_mut().try_concat().await?.to_vec();
 
-                #[cfg(feature = "runtime")]
-                return Ok(core_ref.run(fut_req)?);
+                if body.is_empty() {
+                    Ok((status, None))
+                } else {
+                    let json_resp = serde_json::from_slice(&body).ok();
+                    Ok((status, json_resp))
+                }
             }
         }
     };

@@ -1,6 +1,6 @@
 use super::{encode_pairs, Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
 use hyper::{self, Method};
-use serde;
+use serde::Deserialize;
 
 #[derive(Debug, Default)]
 pub struct Call<'a> {
@@ -125,12 +125,13 @@ pub struct SendCall<'a> {
 
 execute!(SendCall);
 
+#[async_trait]
 impl<'a> TwilioRequest for SendCall<'a> {
     type Resp = CallResp;
 
-    fn run(self) -> TwilioResp<Self::Resp> {
+    async fn run(&self) -> TwilioResp<Self::Resp> {
         let call = self.call.to_string();
-        self.execute(Method::POST, "Calls.json", Some(call))
+        self.execute(Method::POST, "Calls.json", Some(call)).await
     }
 }
 

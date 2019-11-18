@@ -1,11 +1,5 @@
 # twilio-async
 
-## **Breaking Change** 0.2.0
-
-When updating to `hyper@0.12` I decided to change the API slightly. I never liked that twilio-async made decisions about the `Core` and event loop that the requests would run in, so `.run()` now returns a `Box<Future>`. I would have made it return an `impl Future` but this is currently impossible on stable as long as we lack existential return types from trait functions.
-
-There is a `runtime` feature I've added that includes `tokio_core` as a dependency, in this case, `.run()` will execute the request in an event loop that's provided by the library. i.e. We will keep a reference to `Core` and run requests there instead of returning `Futures`.
-
 ## Example Usage
 
 An async and ergonomic wrapper around Twilio API & TwiML.
@@ -17,39 +11,41 @@ The `examples/` dir has up to date working example code.
 Messages:
 
 ```rust
-let twilio = Twilio::new(account_sid, token)?;
-let mut core = Core::new()?;
 
-// sending a message
-core.run(twilio.send_msg("from", "to", "Hello World").run())?;
-// sending a body-less message with media
-core.run(twilio
-    .send_msg("from", "to", "body")
-    .media("http://i0.kym-cdn.com/photos/images/newsfeed/000/377/946/0b9.jpg")
-    .run())?;
-// get details about a message
-core.run(twilio.msg("messagesid").run())?;
-// redact a message
-core.run(twilio.msg("messagesid").redact())?;
-// get a msg media url
-core.run(twilio.msg("messagesid").media())?;
-// delete a msg
-core.run(twilio.msg("messagesid").delete())?;
-// get all messages
-core.run(twilio.msgs().run())?;
-// get all messages between some time
-core.run(twilio.msgs().between("start date", "end date").run())?;
-// get all messages on a specific date
-core.run(twilio.msgs().on("date").run())?;
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let twilio = Twilio::new(account_sid, token)?;
+    // sending a message
+    twilio.send_msg("from", "to", "Hello World").run()).await?;
+    // sending a body-less message with media
+    twilio
+        .send_msg("from", "to", "body")
+        .media("http://i0.kym-cdn.com/photos/images/newsfeed/000/377/946/0b9.jpg")
+        .run()).await?;
+    // get details about a message
+    twilio.msg("messagesid").run()).await?;
+    // redact a message
+    twilio.msg("messagesid").redact()).await?;
+    // get a msg media url
+    twilio.msg("messagesid").media()).await?;
+    // delete a msg
+    twilio.msg("messagesid").delete()).await?;
+    // get all messages
+    twilio.msgs().run()).await?;
+    // get all messages between some time
+    twilio.msgs().between("start date", "end date").run()).await?;
+    // get all messages on a specific date
+    twilio.msgs().on("date").run()).await?;
+}
 ```
 
 Calls:
 
 ```rust
 let twilio = Twilio::new(env::var("TWILIO_SID")?, env::var("TWILIO_TOKEN")?)?;
-let (headers, status, resp) = core.run(twilio
+let (headers, status, resp) = twilio
     .call("from", "to", "http://demo.twilio.com/docs/voice.xml")
-    .run())?;
+    .run()).await?;
 ```
 
 Twiml:
@@ -65,10 +61,10 @@ let s = "<Response><Say voice=\"man\" language=\"en\" loop=\"1\">Hello World</Sa
 assert_eq!(resp.unwrap(), s.to_string());
 ```
 
-## Early release
+## Contributing
 
-This library is a work in progress, messages and calls are tested, there is untested code for conferences/recordings.
+There is untested code for conferences/recordings.
 
-The TwiML work is complete and has some test coverage. Webhooks will be added.
+The TwiML work is complete and has some test coverage.
 
 PRs and suggestions are welcome.

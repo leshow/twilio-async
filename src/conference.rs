@@ -1,6 +1,6 @@
 use super::{encode_pairs, Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
 use hyper::{self, Method};
-use serde;
+use serde::Deserialize;
 
 #[derive(Debug, Default)]
 pub struct Conference<'a> {
@@ -31,18 +31,22 @@ impl<'a> GetConference<'a> {
 
 execute!(GetConference);
 
+#[async_trait]
 impl<'a> TwilioRequest for GetConference<'a> {
     type Resp = ConferenceResp;
 
-    fn run(self) -> TwilioResp<Self::Resp> {
+    async fn run(&self) -> TwilioResp<Self::Resp> {
         let url = format!("Conferences/{}.json", self.conference.sid);
         match self.conference.status {
-            Some(status) => self.execute(
-                Method::POST,
-                url,
-                Some(encode_pairs(&[("Status", status)]).unwrap()),
-            ),
-            None => self.execute(Method::GET, url, None),
+            Some(status) => {
+                self.execute(
+                    Method::POST,
+                    url,
+                    Some(encode_pairs(&[("Status", status)]).unwrap()),
+                )
+                .await
+            }
+            None => self.execute(Method::GET, url, None).await,
         }
     }
 }
@@ -54,11 +58,12 @@ pub struct Conferences<'a> {
 
 execute!(Conferences);
 
+#[async_trait]
 impl<'a> TwilioRequest for Conferences<'a> {
     type Resp = ListConferencesResp;
 
-    fn run(self) -> TwilioResp<Self::Resp> {
-        self.execute(Method::GET, "Conferences.json", None)
+    async fn run(&self) -> TwilioResp<Self::Resp> {
+        self.execute(Method::GET, "Conferences.json", None).await
     }
 }
 
