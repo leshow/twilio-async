@@ -1,4 +1,6 @@
-use super::{encode_pairs, url_encode, Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
+use super::{
+    encode_pairs, url_encode, Execute, Twilio, TwilioErr, TwilioJson, TwilioRequest, TwilioResp,
+};
 use async_trait::async_trait;
 use hyper::{self, Method};
 use serde::Deserialize;
@@ -88,7 +90,7 @@ execute!(SendMsg);
 impl<'a> TwilioRequest for SendMsg<'a> {
     type Resp = MsgResp;
 
-    async fn run(&self) -> TwilioResp<Self::Resp> {
+    async fn run(&self) -> TwilioResp<TwilioJson<Self::Resp>> {
         let msg = self.msg.to_string();
         self.execute(Method::POST, "Messages.json", Some(msg)).await
     }
@@ -106,25 +108,25 @@ execute!(GetMessage);
 impl<'a> TwilioRequest for GetMessage<'a> {
     type Resp = MsgResp;
 
-    async fn run(&self) -> TwilioResp<Self::Resp> {
+    async fn run(&self) -> TwilioResp<TwilioJson<Self::Resp>> {
         let msg_sid = format!("Messages/{}.json", self.message_sid);
         self.execute(Method::GET, msg_sid, None).await
     }
 }
 
 impl<'a> GetMessage<'a> {
-    pub async fn redact(&self) -> TwilioResp<MsgResp> {
+    pub async fn redact(&self) -> TwilioResp<TwilioJson<MsgResp>> {
         let msg_sid = format!("Messages/{}.json", self.message_sid);
         self.execute(Method::POST, msg_sid, Some("Body=".into()))
             .await
     }
 
-    pub async fn delete(&self) -> TwilioResp<MsgResp> {
+    pub async fn delete(&self) -> TwilioResp<TwilioJson<MsgResp>> {
         let msg_sid = format!("Messages/{}.json", self.message_sid);
         self.execute(Method::DELETE, msg_sid, None).await
     }
 
-    pub async fn media(&self) -> TwilioResp<MediaResp> {
+    pub async fn media(&self) -> TwilioResp<TwilioJson<MediaResp>> {
         let msg_sid = format!("Messages/{}/Media.json", self.message_sid);
         self.execute(Method::GET, msg_sid, None).await
     }
@@ -184,7 +186,7 @@ execute!(Messages);
 impl<'a> TwilioRequest for Messages<'a> {
     type Resp = ListAllMsgs;
 
-    async fn run(&self) -> TwilioResp<Self::Resp> {
+    async fn run(&self) -> TwilioResp<TwilioJson<Self::Resp>> {
         self.execute(Method::GET, "Messages.json", None).await
     }
 }
@@ -213,7 +215,7 @@ execute!(MessagesDetails);
 impl<'a> TwilioRequest for MessagesDetails<'a> {
     type Resp = ListAllMsgs;
 
-    async fn run(&self) -> TwilioResp<Self::Resp> {
+    async fn run(&self) -> TwilioResp<TwilioJson<Self::Resp>> {
         let url = format!("Messages.json?{}", self.to_string());
         self.execute(Method::GET, url, None).await
     }

@@ -27,7 +27,7 @@ macro_rules! execute {
                 for (k, v) in hmap {
                     request = request.header(k.unwrap().as_str(), v);
                 }
-                dbg!(Ok(match body {
+                Ok(match body {
                     Some(body) => request
                         .header(
                             CONTENT_TYPE,
@@ -35,7 +35,7 @@ macro_rules! execute {
                         )
                         .body(hyper::Body::from(body))?,
                     None => request.body(hyper::Body::empty())?,
-                }))
+                })
             }
 
             async fn execute<U, D>(
@@ -43,7 +43,7 @@ macro_rules! execute {
                 method: Method,
                 url: U,
                 body: Option<String>,
-            ) -> TwilioResp<D>
+            ) -> TwilioResp<crate::TwilioJson<D>>
             where
                 U: AsRef<str> + Send,
                 D: for<'de> serde::Deserialize<'de>,
@@ -51,7 +51,7 @@ macro_rules! execute {
                 use bytes::buf::ext::BufExt;
                 use serde_json;
 
-                let req = self.request(method, url, body).unwrap();
+                let req = self.request(method, url, body)?;
 
                 let res = self
                     .client
@@ -60,15 +60,13 @@ macro_rules! execute {
                     .await
                     .map_err(TwilioErr::NetworkErr)?;
 
-                let status = res.status();
-
                 let body = hyper::body::aggregate(res).await;
 
                 match body {
-                    Err(_) => Ok((status, None)),
+                    Err(_) => Ok(None),
                     Ok(body) => {
                         let json_resp = serde_json::from_reader(body.reader())?;
-                        Ok((status, json_resp))
+                        Ok(json_resp)
                     }
                 }
             }

@@ -1,4 +1,4 @@
-use super::{encode_pairs, Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
+use super::{encode_pairs, Execute, Twilio, TwilioErr, TwilioJson, TwilioRequest, TwilioResp};
 use async_trait::async_trait;
 use hyper::{self, Method};
 use serde::Deserialize;
@@ -130,7 +130,7 @@ execute!(SendCall);
 impl<'a> TwilioRequest for SendCall<'a> {
     type Resp = CallResp;
 
-    async fn run(&self) -> TwilioResp<Self::Resp> {
+    async fn run(&self) -> TwilioResp<TwilioJson<Self::Resp>> {
         let call = self.call.to_string();
         self.execute(Method::POST, "Calls.json", Some(call)).await
     }

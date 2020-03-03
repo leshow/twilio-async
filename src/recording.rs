@@ -1,4 +1,4 @@
-use super::{Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
+use super::{Execute, Twilio, TwilioErr, TwilioJson, TwilioRequest, TwilioResp};
 use async_trait::async_trait;
 use hyper::{self, Method};
 use serde::Deserialize;
@@ -26,14 +26,14 @@ execute!(GetRecording);
 impl<'a> TwilioRequest for GetRecording<'a> {
     type Resp = RecordingResp;
 
-    async fn run(&self) -> TwilioResp<Self::Resp> {
+    async fn run(&self) -> TwilioResp<TwilioJson<Self::Resp>> {
         let url = format!("Recordings/{}.json", self.recording.sid);
         self.execute(Method::GET, url, None).await
     }
 }
 
 impl<'a> GetRecording<'a> {
-    pub async fn delete(&self) -> TwilioResp<Option<bool>> {
+    pub async fn delete(&self) -> TwilioResp<TwilioJson<Option<bool>>> {
         let url = format!("Recordings/{}.json", self.recording.sid);
         self.execute(Method::DELETE, url, None).await
     }
@@ -50,23 +50,30 @@ execute!(Recordings);
 impl<'a> TwilioRequest for Recordings<'a> {
     type Resp = ListRecordingResp;
 
-    async fn run(&self) -> TwilioResp<Self::Resp> {
+    async fn run(&self) -> TwilioResp<TwilioJson<Self::Resp>> {
         self.execute(Method::GET, "Recordings.json", None).await
     }
 }
 
 impl<'a> Recordings<'a> {
-    pub async fn for_call(&self, call_sid: &'a str) -> TwilioResp<ListRecordingResp> {
+    pub async fn for_call(&self, call_sid: &'a str) -> TwilioResp<TwilioJson<ListRecordingResp>> {
         let url = format!("Recordings.json?CallSid={}", call_sid);
         self.execute(Method::GET, url, None).await
     }
 
-    pub async fn created(&self, date_created: &'a str) -> TwilioResp<ListRecordingResp> {
+    pub async fn created(
+        &self,
+        date_created: &'a str,
+    ) -> TwilioResp<TwilioJson<ListRecordingResp>> {
         let url = format!("Recordings.json?DateCreated={}", date_created);
         self.execute(Method::GET, url, None).await
     }
 
-    pub async fn range(&self, before: &'a str, after: &'a str) -> TwilioResp<ListRecordingResp> {
+    pub async fn range(
+        &self,
+        before: &'a str,
+        after: &'a str,
+    ) -> TwilioResp<TwilioJson<ListRecordingResp>> {
         let url = format!(
             "Recordings.json?DateCreatedBefore={}&DateCreatedAfter={}",
             before, after

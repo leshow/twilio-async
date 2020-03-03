@@ -14,6 +14,7 @@ pub use crate::{call::*, conference::*, error::*, message::*, recording::*};
 use async_trait::async_trait;
 use hyper::{client::HttpConnector, Body, Client, Method, Request};
 use hyper_tls::HttpsConnector;
+use serde::Deserialize;
 use std::borrow::Borrow;
 
 pub use typed_headers::{Authorization, Credentials};
@@ -26,7 +27,7 @@ pub struct Twilio {
     client: Client<HttpsConnector<HttpConnector>, hyper::Body>,
 }
 
-pub type TwilioResp<T> = Result<(hyper::StatusCode, Option<T>), TwilioErr>;
+pub type TwilioResp<T> = Result<Option<T>, TwilioErr>;
 
 impl Twilio {
     pub fn new<S, P>(sid: S, token: P) -> TwilioResult<Twilio>
@@ -97,6 +98,17 @@ impl Twilio {
     }
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+pub enum TwilioJson<T> {
+    Success(T),
+    Fail {
+        code: usize,
+        message: String,
+        status: usize,
+    },
+}
+
 #[async_trait]
 pub trait Execute {
     fn request<U>(
@@ -107,7 +119,12 @@ pub trait Execute {
     ) -> Result<Request<Body>, TwilioErr>
     where
         U: AsRef<str>;
-    async fn execute<U, D>(&self, method: Method, url: U, body: Option<String>) -> TwilioResp<D>
+    async fn execute<U, D>(
+        &self,
+        method: Method,
+        url: U,
+        body: Option<String>,
+    ) -> TwilioResp<TwilioJson<D>>
     where
         U: AsRef<str> + Send,
         D: for<'de> serde::Deserialize<'de>;
@@ -116,7 +133,7 @@ pub trait Execute {
 #[async_trait]
 pub trait TwilioRequest: Execute {
     type Resp: for<'de> serde::Deserialize<'de>;
-    async fn run(&self) -> TwilioResp<Self::Resp>;
+    async fn run(&self) -> TwilioResp<TwilioJson<Self::Resp>>;
 }
 
 pub fn encode_pairs<I, K, V>(pairs: I) -> Option<String>

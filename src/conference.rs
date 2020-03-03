@@ -1,4 +1,4 @@
-use super::{encode_pairs, Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
+use super::{encode_pairs, Execute, Twilio, TwilioErr, TwilioJson, TwilioRequest, TwilioResp};
 use async_trait::async_trait;
 use hyper::{self, Method};
 use serde::Deserialize;
@@ -36,7 +36,7 @@ execute!(GetConference);
 impl<'a> TwilioRequest for GetConference<'a> {
     type Resp = ConferenceResp;
 
-    async fn run(&self) -> TwilioResp<Self::Resp> {
+    async fn run(&self) -> TwilioResp<TwilioJson<Self::Resp>> {
         let url = format!("Conferences/{}.json", self.conference.sid);
         match self.conference.status {
             Some(status) => {
@@ -63,7 +63,7 @@ execute!(Conferences);
 impl<'a> TwilioRequest for Conferences<'a> {
     type Resp = ListConferencesResp;
 
-    async fn run(&self) -> TwilioResp<Self::Resp> {
+    async fn run(&self) -> TwilioResp<TwilioJson<Self::Resp>> {
         self.execute(Method::GET, "Conferences.json", None).await
     }
 }

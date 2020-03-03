@@ -31,7 +31,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // delete a msg
     twilio.msg("messagesid").delete().await?;
     // get all messages
-    twilio.msgs().run()).await?;
+    twilio.msgs().run().await?;
     // get all messages between some time
     twilio.msgs().between("start date", "end date").run().await?;
     // get all messages on a specific date
