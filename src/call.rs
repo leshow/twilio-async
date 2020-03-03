@@ -1,4 +1,5 @@
 use super::{encode_pairs, Execute, Twilio, TwilioErr, TwilioRequest, TwilioResp};
+use async_trait::async_trait;
 use hyper::{self, Method};
 use serde::Deserialize;
 

@@ -1,6 +1,4 @@
 #![allow(dead_code)]
-#[macro_use]
-extern crate async_trait;
 
 #[macro_use]
 mod macros;
@@ -13,6 +11,7 @@ pub mod twiml;
 
 pub use crate::{call::*, conference::*, error::*, message::*, recording::*};
 
+use async_trait::async_trait;
 use hyper::{client::HttpConnector, Body, Client, Method, Request};
 use hyper_tls::HttpsConnector;
 use std::borrow::Borrow;
@@ -36,7 +35,7 @@ impl Twilio {
         P: AsRef<str>,
     {
         let sid = sid.into();
-        let client = Client::builder().build::<_, hyper::Body>(HttpsConnector::new()?);
+        let client = Client::builder().build::<_, hyper::Body>(HttpsConnector::new());
 
         #[cfg(feature = "runtime")]
         let core = Core::new()?;
