@@ -43,7 +43,7 @@ Calls:
 
 ```rust
 let twilio = Twilio::new(env::var("TWILIO_SID")?, env::var("TWILIO_TOKEN")?)?;
-let (headers, status, resp) = twilio
+let (status, resp) = twilio
     .call("from", "to", "http://demo.twilio.com/docs/voice.xml")
     .run().await?;
 ```
