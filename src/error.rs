@@ -20,16 +20,16 @@ pub use super::TwilioErr::*;
 pub type TwilioResult<T> = Result<T, TwilioErr>;
 
 impl Error for TwilioErr {
-    fn description(&self) -> &str {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
         match *self {
-            Io(ref e) => e.description(),
-            SerdeErr(ref e) => e.description(),
-            UrlParse(ref e) => e.description(),
-            NetworkErr(ref e) => e.description(),
-            BorrowErr(ref e) => e.description(),
-            Utf8Err(ref e) => e.description(),
-            HttpErr(ref e) => e.description(),
-            HeaderErr(ref e) => e.description(),
+            Io(ref e) => e.source(),
+            SerdeErr(ref e) => e.source(),
+            UrlParse(ref e) => e.source(),
+            NetworkErr(ref e) => e.source(),
+            BorrowErr(ref e) => e.source(),
+            Utf8Err(ref e) => e.source(),
+            HttpErr(ref e) => e.source(),
+            HeaderErr(ref e) => e.source(),
         }
     }
 }

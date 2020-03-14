@@ -1,11 +1,6 @@
-extern crate twilio_async;
-
+#![allow(dead_code)]
 use std::{env, error::Error};
-use tokio::prelude::*;
-use twilio_async::{
-    twiml::{Dial, Response},
-    MsgResp, Twilio, TwilioJson, TwilioRequest,
-};
+use twilio_async::{MsgResp, Twilio, TwilioJson, TwilioRequest};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
@@ -17,7 +12,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
 }
 
 async fn try_conference(twilio: Twilio) -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
-    let resp = twilio.conferences().run().await?;
+    let _resp = twilio.conferences().run().await?;
 
     let resp = twilio
         .conference("EH5bc4f5c62684f43d0acadb3d88a43e38")

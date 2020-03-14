@@ -14,11 +14,11 @@ pub use super::TwimlErr::*;
 pub type TwimlResult<T> = Result<T, TwimlErr>;
 
 impl Error for TwimlErr {
-    fn description(&self) -> &str {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
         match *self {
-            Io(ref e) => e.description(),
-            Utf8Err(ref e) => e.description(),
-            EmitterErr(ref e) => e.description(),
+            Io(ref e) => e.source(),
+            Utf8Err(ref e) => e.source(),
+            EmitterErr(ref e) => e.source(),
         }
     }
 }
