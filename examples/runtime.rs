@@ -2,8 +2,10 @@
 use std::{env, error::Error};
 use twilio_async::{MsgResp, Twilio, TwilioJson, TwilioRequest};
 
+type Result<T> = std::result::Result<T, Box<dyn Error + Send + Sync + 'static>>;
+
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
+async fn main() -> Result<()> {
     let twilio = Twilio::new(env::var("TWILIO_SID")?, env::var("TWILIO_TOKEN")?)?;
     try_msg(twilio).await?;
     // try_call(twilio).await?;
@@ -11,7 +13,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
     Ok(())
 }
 
-async fn try_conference(twilio: Twilio) -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
+async fn try_conference(twilio: Twilio) -> Result<()> {
     let _resp = twilio.conferences().run().await?;
 
     let resp = twilio
@@ -23,7 +25,7 @@ async fn try_conference(twilio: Twilio) -> Result<(), Box<dyn Error + Send + Syn
     Ok(())
 }
 
-async fn try_msg(twilio: Twilio) -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
+async fn try_msg(twilio: Twilio) -> Result<()> {
     let num = env::var("OUTBOUND_NUM")?;
     // sending a message
     let resp = twilio.send_msg(&num, &num, "Hello World").run().await?;
@@ -64,7 +66,7 @@ async fn try_msg(twilio: Twilio) -> Result<(), Box<dyn Error + Send + Sync + 'st
     Ok(())
 }
 
-async fn try_call(twilio: Twilio) -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
+async fn try_call(twilio: Twilio) -> Result<()> {
     let resp = twilio
         .call(
             "18193074013",
