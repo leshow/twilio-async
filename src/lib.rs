@@ -38,15 +38,10 @@ impl Twilio {
         let sid = sid.into();
         let client = Client::builder().build::<_, hyper::Body>(HttpsConnector::new());
 
-        #[cfg(feature = "runtime")]
-        let core = Core::new()?;
-
         Ok(Twilio {
             auth: Authorization(Credentials::basic(&sid, token.as_ref())?),
             sid,
             client,
-            #[cfg(feature = "runtime")]
-            core: Rc::new(RefCell::new(core)),
         })
     }
 
