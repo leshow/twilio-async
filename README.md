@@ -21,7 +21,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     twilio
         .send_msg("from", "to", "body")
         .media("http://i0.kym-cdn.com/photos/images/newsfeed/000/377/946/0b9.jpg")
-        .run()).await?;
+        .run().await?;
     // get details about a message
     twilio.msg("messagesid").run().await?;
     // redact a message
