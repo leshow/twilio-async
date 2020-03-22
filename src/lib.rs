@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-#![doc(html_root_url = "https://docs.rs/twilio-async/0.4.0")]
+#![doc(html_root_url = "https://docs.rs/twilio-async/0.4.1")]
 #![allow(
     clippy::cognitive_complexity,
     clippy::large_enum_variant,
@@ -29,7 +29,7 @@
 //! Messages:
 //!
 //! ```rust,no_run
-//! 
+//!
 //! use std::env;
 //! use twilio_async::{Twilio, TwilioRequest};
 //!
@@ -64,7 +64,7 @@
 //! Calls:
 //!
 //! ```rust,no_run
-//! 
+//!
 //! # use std::{error::Error, env};
 //! # use twilio_async::{Twilio, TwilioJson, TwilioRequest};
 //!
