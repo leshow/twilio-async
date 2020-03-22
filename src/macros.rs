@@ -60,15 +60,10 @@ macro_rules! execute {
                     .await
                     .map_err(TwilioErr::NetworkErr)?;
 
-                let body = hyper::body::aggregate(res).await;
+                let body = hyper::body::aggregate(res).await?;
 
-                match body {
-                    Err(_) => Ok(None),
-                    Ok(body) => {
-                        let json_resp = serde_json::from_reader(body.reader())?;
-                        Ok(json_resp)
-                    }
-                }
+                let json_resp = serde_json::from_reader(body.reader())?;
+                Ok(json_resp)
             }
         }
     };

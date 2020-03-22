@@ -1,4 +1,99 @@
 #![allow(dead_code)]
+#![doc(html_root_url = "https://docs.rs/twilio-async/0.4.0")]
+#![allow(
+    clippy::cognitive_complexity,
+    clippy::large_enum_variant,
+    clippy::needless_doctest_main
+)]
+#![warn(
+    missing_debug_implementations,
+    // missing_docs,
+    rust_2018_idioms,
+    unreachable_pub
+)]
+#![deny(intra_doc_link_resolution_failure)]
+#![doc(test(
+    no_crate_inject,
+    attr(deny(warnings, rust_2018_idioms), allow(dead_code, unused_variables))
+))]
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
+//! An async client library for interaction with twilio APIs
+//! An async and ergonomic wrapper around Twilio API & TwiML.
+//!
+//! All types can run `run()` or a similar function. They return a value that
+//! implements `Deserialize`.
+//!
+//! The `examples/` dir has up to date working example code.
+//!
+//! Messages:
+//!
+//! ```rust,no_run
+//! 
+//! use std::env;
+//! use twilio_async::{Twilio, TwilioRequest};
+//!
+//! #[tokio::main]
+//! async fn main() -> Result<(), Box<dyn std::error::Error>> {
+//!     let twilio = Twilio::new(env::var("TWILIO_SID")?, env::var("TWILIO_TOKEN")?)?;
+//!     // sending a message
+//!     twilio.send_msg("from", "to", "Hello World").run().await?;
+//!     // sending a body-less message with media
+//!     twilio
+//!         .send_msg("from", "to", "body")
+//!         .media("http://i0.kym-cdn.com/photos/images/newsfeed/000/377/946/0b9.jpg")
+//!         .run().await?;
+//!     // get details about a message
+//!     twilio.msg("messagesid").run().await?;
+//!     // redact a message
+//!     twilio.msg("messagesid").redact().await?;
+//!     // get a msg media url
+//!     twilio.msg("messagesid").media().await?;
+//!     // delete a msg
+//!     twilio.msg("messagesid").delete().await?;
+//!     // get all messages
+//!     twilio.msgs().run().await?;
+//!     // get all messages between some time
+//!     twilio.msgs().between("start date", "end date").run().await?;
+//!     // get all messages on a specific date
+//!     twilio.msgs().on("date").run().await?;
+//!     Ok(())
+//! }
+//! ```
+//!
+//! Calls:
+//!
+//! ```rust,no_run
+//! 
+//! # use std::{error::Error, env};
+//! # use twilio_async::{Twilio, TwilioJson, TwilioRequest};
+//!
+//! # #[tokio::main]
+//! # async fn main() -> Result<(), Box<dyn Error>> {
+//! let twilio = Twilio::new(env::var("TWILIO_SID")?, env::var("TWILIO_TOKEN")?)?;
+//! if let TwilioJson::Success(call) = twilio
+//!     .call("from", "to", "http://demo.twilio.com/docs/voice.xml")
+//!     .run().await? {
+//!     // do something with `call`
+//! }
+//! # Ok(())
+//! # }
+//! ```
+//!
+//! Twiml:
+//!
+//! ```rust
+//! # fn main() {
+//! use twilio_async::twiml::{Response, Twiml};
+//!
+//! let resp = Response::new()
+//!     .say("Hello World") // builder pattern also supports say(Say::new("Hello World").lang("de")...)
+//!     .play("https://api.twilio.com/Cowbell.mp3")
+//!     .build();
+//! let s = "<Response><Say voice=\"man\" language=\"en\" loop=\"1\">Hello World</Say><Play loop=\"1\">https://api.twilio.com/Cowbell.mp3</Play></Response>";
+//! assert_eq!(resp.unwrap(), s.to_string());
+//! # }
+//! ```
 
 #[macro_use]
 mod macros;
@@ -27,7 +122,7 @@ pub struct Twilio {
     client: Client<HttpsConnector<HttpConnector>, hyper::Body>,
 }
 
-pub type TwilioResp<T> = Result<Option<T>, TwilioErr>;
+pub type TwilioResp<T> = Result<T, TwilioErr>;
 
 impl Twilio {
     pub fn new<S, P>(sid: S, token: P) -> TwilioResult<Twilio>

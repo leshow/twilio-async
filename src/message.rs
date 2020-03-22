@@ -156,6 +156,7 @@ pub struct MediaItem {
     pub date_update: String,
 }
 
+#[derive(Debug)]
 pub struct Messages<'a> {
     pub client: &'a Twilio,
 }
@@ -191,6 +192,7 @@ impl<'a> TwilioRequest for Messages<'a> {
     }
 }
 
+#[derive(Debug)]
 pub struct MessagesDetails<'a> {
     pub client: &'a Twilio,
     pub from: Option<&'a str>,

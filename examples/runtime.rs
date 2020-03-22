@@ -38,7 +38,7 @@ async fn try_msg(twilio: Twilio) -> Result<()> {
         .run()
         .await?;
     // get individual msg
-    if let Some(TwilioJson::Success(MsgResp { sid, .. })) = resp {
+    if let TwilioJson::Success(MsgResp { sid, .. }) = resp {
         let resp = twilio.msg(&sid).run().await?;
         println!("{:?}", resp);
     }

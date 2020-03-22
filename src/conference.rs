@@ -18,6 +18,7 @@ impl<'a> Conference<'a> {
 }
 
 // GET ONE CONFERENCE
+#[derive(Debug)]
 pub struct GetConference<'a> {
     pub conference: Conference<'a>,
     pub client: &'a Twilio,
@@ -53,6 +54,7 @@ impl<'a> TwilioRequest for GetConference<'a> {
 }
 
 // GET ALL CONFERENCES
+#[derive(Debug)]
 pub struct Conferences<'a> {
     pub client: &'a Twilio,
 }

@@ -1,11 +1,12 @@
 [package]
 name = "twilio-async"
-version = "0.3.0"
+version = "0.4.0"
 description = """
 An async and ergonomic wrapper around Twilio API & TwiML
 """
 readme = "README.md"
 repository = "https://github.com/leshow/twilio"
+documentation = "https://docs.rs/tokio/0.3.0/twilio-async/"
 license = "MIT"
 keywords = ["twilio", "twiml", "api", "async", "hyper"]
 categories = ["network-programming", "api-bindings", "web-programming", "development-tools"]
@@ -33,3 +34,7 @@ tokio = { version = "0.2", features = ["full"] }
 [[example]]
 name = "runtime"
 path = "examples/runtime.rs"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

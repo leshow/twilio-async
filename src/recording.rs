@@ -15,6 +15,7 @@ impl<'a> Recording<'a> {
 }
 
 // GET ONE Recording
+#[derive(Debug)]
 pub struct GetRecording<'a> {
     pub recording: Recording<'a>,
     pub client: &'a Twilio,
@@ -40,6 +41,7 @@ impl<'a> GetRecording<'a> {
 }
 
 // GET ALL RECORDINGS
+#[derive(Debug)]
 pub struct Recordings<'a> {
     pub client: &'a Twilio,
 }

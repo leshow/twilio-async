@@ -119,6 +119,7 @@ pub enum Direction {
     trunking_originating,
 }
 
+#[derive(Debug)]
 pub struct SendCall<'a> {
     pub call: Call<'a>,
     pub client: &'a Twilio,

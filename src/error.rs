@@ -35,7 +35,7 @@ impl Error for TwilioErr {
 }
 
 impl fmt::Display for TwilioErr {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
             Io(ref e) => write!(f, "IO Error: {}", e),
             SerdeErr(ref e) => write!(f, "Serde JSON Error: {}", e),
