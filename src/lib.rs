@@ -3,7 +3,8 @@
 #![allow(
     clippy::cognitive_complexity,
     clippy::large_enum_variant,
-    clippy::needless_doctest_main
+    clippy::needless_doctest_main,
+    clippy::needless_lifetimes
 )]
 #![warn(
     missing_debug_implementations,

@@ -1,5 +1,3 @@
-use hyper;
-use serde_json;
 use std::{cell, error::Error, fmt, io, string};
 
 // Errors

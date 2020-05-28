@@ -104,7 +104,7 @@ impl<'a> Twiml for Dial<'a> {
 
     fn build(&self) -> TwimlResult<String> {
         // Create a buffer and serialize our nodes into it
-        let mut writer = Vec::with_capacity(30);
+        let mut writer = Vec::new();
         {
             let mut w = EmitterConfig::new()
                 .write_document_declaration(false)
