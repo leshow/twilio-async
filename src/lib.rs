@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-#![doc(html_root_url = "https://docs.rs/twilio-async/0.4.1")]
+#![doc(html_root_url = "https://docs.rs/twilio-async/0.5")]
 #![allow(
     clippy::cognitive_complexity,
     clippy::large_enum_variant,
@@ -12,7 +12,7 @@
     rust_2018_idioms,
     unreachable_pub
 )]
-#![deny(intra_doc_link_resolution_failure)]
+#![deny(broken_intra_doc_links)]
 #![doc(test(
     no_crate_inject,
     attr(deny(warnings, rust_2018_idioms), allow(dead_code, unused_variables))
@@ -258,7 +258,7 @@ where
         })
         .fold(String::new(), |mut acc, item| {
             acc.push_str(&item);
-            acc.push_str("&");
+            acc.push('&');
             acc
         })
 }

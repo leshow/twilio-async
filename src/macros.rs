@@ -48,7 +48,7 @@ macro_rules! execute {
                 U: AsRef<str> + Send,
                 D: for<'de> serde::Deserialize<'de>,
             {
-                use bytes::buf::ext::BufExt;
+                use bytes::buf::Buf;
                 use serde_json;
 
                 let req = self.request(method, url, body)?;
