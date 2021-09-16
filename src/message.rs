@@ -164,7 +164,7 @@ pub struct Messages<'a> {
 impl<'a> Messages<'a> {
     pub fn between(self, from: &'a str, to: &'a str) -> MessagesDetails<'a> {
         MessagesDetails {
-            client: &self.client,
+            client: self.client,
             from: Some(from),
             to: Some(to),
             date_sent: None,
@@ -173,7 +173,7 @@ impl<'a> Messages<'a> {
 
     pub fn on(self, date_sent: &'a str) -> MessagesDetails<'a> {
         MessagesDetails {
-            client: &self.client,
+            client: self.client,
             from: None,
             to: None,
             date_sent: Some(date_sent),
