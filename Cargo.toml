@@ -19,7 +19,7 @@ members = ["./", "twiml"]
 [dependencies]
 async-trait = "0.1"
 bytes = "1"
-hyper = { version = "0.14", features = ["stream", "client", "http1", "http2"] }
+hyper = { version = "0.14", features = ["stream", "client", "http1"] }
 hyper-tls = "0.5"
 typed-headers = "0.2"
 http = "0.2"
