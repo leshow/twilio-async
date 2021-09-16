@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-#![doc(html_root_url = "https://docs.rs/twilio-async/0.5")]
+#![doc(html_root_url = "https://docs.rs/twilio-async/0.5.0")]
 #![allow(
     clippy::cognitive_complexity,
     clippy::large_enum_variant,
@@ -12,7 +12,7 @@
     rust_2018_idioms,
     unreachable_pub
 )]
-#![deny(broken_intra_doc_links)]
+#![deny(rustdoc::broken_intra_doc_links)]
 #![doc(test(
     no_crate_inject,
     attr(deny(warnings, rust_2018_idioms), allow(dead_code, unused_variables))
@@ -144,48 +144,48 @@ impl Twilio {
     pub fn send_msg<'a>(&'a self, from: &'a str, to: &'a str, body: &'a str) -> SendMsg<'a> {
         SendMsg {
             msg: Msg::new(from, to, body),
-            client: &self,
+            client: self,
         }
     }
 
     pub fn msg<'a>(&'a self, message_sid: &'a str) -> GetMessage<'a> {
         GetMessage {
             message_sid,
-            client: &self,
+            client: self,
         }
     }
 
     pub fn msgs(&self) -> Messages<'_> {
-        Messages { client: &self }
+        Messages { client: self }
     }
 
     pub fn call<'a>(&'a self, from: &'a str, to: &'a str, url: &'a str) -> SendCall<'a> {
         SendCall {
             call: Call::new(from, to, url),
-            client: &self,
+            client: self,
         }
     }
 
     pub fn conference<'a>(&'a self, sid: &'a str) -> GetConference<'a> {
         GetConference {
             conference: Conference::new(sid),
-            client: &self,
+            client: self,
         }
     }
 
     pub fn conferences(&self) -> Conferences<'_> {
-        Conferences { client: &self }
+        Conferences { client: self }
     }
 
     pub fn recording<'a>(&'a self, sid: &'a str) -> GetRecording<'a> {
         GetRecording {
             recording: Recording::new(sid),
-            client: &self,
+            client: self,
         }
     }
 
     pub fn recordings(&self) -> Recordings<'_> {
-        Recordings { client: &self }
+        Recordings { client: self }
     }
 }
 

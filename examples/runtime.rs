@@ -7,6 +7,7 @@ type Result<T> = std::result::Result<T, Box<dyn Error + Send + Sync + 'static>>;
 #[tokio::main]
 async fn main() -> Result<()> {
     let twilio = Twilio::new(env::var("TWILIO_SID")?, env::var("TWILIO_TOKEN")?)?;
+    println!("{:?}", twilio);
     try_msg(twilio).await?;
     // try_call(twilio).await?;
     // try_conference(twilio).await?;
