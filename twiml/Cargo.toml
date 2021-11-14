@@ -1,6 +1,6 @@
 [package]
 name = "twiml"
-version = "0.3.0"
+version = "0.4.0"
 description = """
 Typesafe construction of Twilio TwiML
 """
@@ -9,7 +9,7 @@ keywords = ["twilio", "twiml", "api"]
 categories = ["network-programming", "api-bindings", "web-programming", "development-tools"]
 license = "MIT"
 authors = ["Evan Cameron <cameron.evan@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 xml-rs = "0.8"
